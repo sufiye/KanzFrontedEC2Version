@@ -1,10 +1,11 @@
-import Navbar from "./components/Navbar"
+
+import HomePage from "./pages/HomePage"
 
 export const App = () => {
   return (
     <>
    <div className="w-full h-screen">
-    <Navbar/>
+    <HomePage/>
       
    </div>
    

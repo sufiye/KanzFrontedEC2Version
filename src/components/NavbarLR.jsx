@@ -19,18 +19,6 @@ const Navbar = () => {
             <a href="">Contact</a>
           </div>
 
-          <div className="flex items-center gap-5">
-
-            <div className="relative">
-
-              <input className="bg-zinc-100 rounded-sm w-[166px] pl-4 p-2 " placeholder="Search" type="search" name="" id="" />
-              <img className="absolute right-3 top-3" src="src\assets\search.png" alt="" />
-            </div>
-
-            <button className="bg-black text-white h-[36px] w-[68px] rounded-sm ">Sing In</button>
-
-          </div>
-
         </div>
 
 

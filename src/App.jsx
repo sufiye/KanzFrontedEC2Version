@@ -1,12 +1,11 @@
 
-import HomePage from "./pages/HomePage"
+import Navigator from "./components/Navigator"
 
 export const App = () => {
   return (
     <>
    <div className="w-full h-screen">
-    <HomePage/>
-      
+    <Navigator/>
    </div>
    
    </>

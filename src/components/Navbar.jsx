@@ -5,9 +5,7 @@ const Navbar = () => {
       <div className="pt-5 flex items-center justify-center gap-50">
 
         <div className="flex items-center gap-2">
-          <img src="src\assets\Logo.png" alt="" />
-          <h1 className="text-2xl">Meta</h1>
-          <h1 className="text-2xl font-bold">Blog</h1>
+          <img src="src\assets\Logo1.png" alt="" />
         </div>
 
         <div className="flex items-center gap-20">

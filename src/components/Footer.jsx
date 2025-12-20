@@ -4,7 +4,7 @@ const Footer = () => {
   return (
     <div className="bg-zinc-100 w-full ">
 
-      <div className=" flex justify-between px-42 py-10">
+      <div className=" flex justify-between px-42 py-10 " id="contact">
 
         <div >
           <h1 className="font-medium text-base text-black mb-3">About</h1>
@@ -45,7 +45,7 @@ const Footer = () => {
         <div className=" flex justify-between items-center px-42 py-5" >
 
           <div className="flex justify-center items-center gap-2">
-            <div><img src="src\assets\Logo.png" alt="" /></div>
+            <div><img src="..\src\assets\Logo.png" alt="" /></div>
             <div>
               <div className="flex">
                 <h1>Meta</h1>

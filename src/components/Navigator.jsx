@@ -5,6 +5,8 @@ import Login from "../pages/Login"
 import Register from "../pages/Register"
 import AddNewBlog from "../pages/AddNewBlog"
 import Details from "../pages/Details"
+import AuthorPage from "../pages/AuthorPage"
+import MyBlogs from "../pages/MyBlogs"
 
 
 const Navigator = () => {
@@ -14,6 +16,8 @@ const Navigator = () => {
     <Route path="/login" element={<Login/>} />
     <Route path="/register" element={<Register/>} />
     <Route path="/newBlog" element={<AddNewBlog/>} />
+    <Route path="/authorPage" element={<AuthorPage/>} />
+    <Route path="/myBlogs" element={<MyBlogs/>} />
     <Route path="/details/:id" element={<Details/>} />
     <Route path="*" element={<NotFound/>} />
 

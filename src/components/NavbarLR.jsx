@@ -1,4 +1,4 @@
-
+import { Link } from "react-router-dom"
 const Navbar = () => {
   return (
     <>
@@ -13,10 +13,10 @@ const Navbar = () => {
         <div className="flex items-center gap-20">
 
           <div className="flex items-center gap-8">
-            <a href="">Home</a>
-            <a href="">Write a Blog</a>
-            <a href="">My Blogs</a>
-            <a href="">Contact</a>
+            <Link to={"/"}><button className="cursor-pointer">Home</button></Link>
+            <Link to={"/newBlog"}><button className="cursor-pointer">Write a Blog</button></Link>
+            <Link to={"/myBlogs"}><button className="cursor-pointer">My Blogs</button></Link>
+            <a href="#contact">Contact</a>
           </div>
 
         </div>

@@ -1,7 +1,7 @@
 
 import axios from "axios";
 import { useTokens } from "../stores/tokenStore.js";
-// import { refreshTokens } from "./utils.js";
+import { refreshTokens } from "./utils.js";
 
 const api = axios.create({
     baseURL: 'https://ilkinibadov.com/api/b/blogs',

@@ -29,15 +29,15 @@ const Details = () => {
         <Navbar/>
         
         <div className="flex justify-center my-20">
-        <div className="grid grid-cols-1 gap-5">
+        <div className="grid grid-cols-1 gap-5 w-200">
         <div className="bg-blue-600 w-fit  py-1 px-4 rounded-lg"><p className="text-base text-white ">{card?.category}</p></div>
         <h1 className="text-4xl font-bold" >{card?.title}</h1>
             <div className="flex gap-5  text-sm text-zinc-500">
-                    <p>{card?.user?.email}</p>
-                    <p>{card?.createdAt}</p>
+                   <a href="">{card?.user?.email}</a>
+                    <p>{new Date(card?.createdAt).toLocaleDateString()}</p>
                 </div>
-            <img src={card?.image} alt="" className="w-[800px] h-[462px] rounded-xl" />
-            <h1 className="text-xl font-serif">{card?.description}</h1>
+            <img src={card?.image} alt="" className="w-[800px] h-[462px] rounded-xl object-cover mb-5" />
+            <h1 className="text-xl font-serif ">{card?.description}</h1>
         </div>
 </div>
         <Footer/>

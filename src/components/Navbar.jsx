@@ -1,20 +1,20 @@
-
+import { Link } from "react-router-dom"
 const Navbar = () => {
   return (
     <>
       <div className="pt-5 flex items-center justify-center gap-50">
 
         <div className="flex items-center gap-2">
-          <img src="src\assets\Logo1.png" alt="" />
+          <img src="..\src\assets\Logo1.png" alt="" />
         </div>
 
         <div className="flex items-center gap-20">
 
           <div className="flex items-center gap-8">
-            <a href="">Home</a>
-            <a href="">Write a Blog</a>
-            <a href="">My Blogs</a>
-            <a href="">Contact</a>
+            <Link to={"/"}><button className="cursor-pointer">Home</button></Link>
+            <Link to={"/newBlog"}><button className="cursor-pointer">Write a Blog</button></Link>
+            <Link to={"/myBlogs"}><button className="cursor-pointer">My Blogs</button></Link>
+            <a href="#contact" >Contact</a>
           </div>
 
           <div className="flex items-center gap-5">
@@ -25,7 +25,7 @@ const Navbar = () => {
               <img className="absolute right-3 top-3" src="src\assets\search.png" alt="" />
             </div>
 
-            <button className="bg-black text-white h-[36px] w-[68px] rounded-sm ">Sing In</button>
+            <Link to={"/login"}><button className="bg-black text-white h-[36px] w-[68px] rounded-sm ">Sing In</button></Link>
 
           </div>
 

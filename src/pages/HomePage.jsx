@@ -6,10 +6,14 @@ import api from "../utils/axios"
 import { useState, useEffect } from "react"
 const HomePage = () => {
   const [cards, setCards] = useState([])
+  const [allCard, setAllCard] = useState(false)
+  const [page, setPage] = useState(1)
+
+
 
   const getCards = async () => {
     try {
-      const { data, statusText } = await api.get()
+      const { data, statusText } = await api.get("?page=1&limit=10")
       console.log(data)
       if (statusText === "OK") {
         setCards(data.blogs)
@@ -19,16 +23,30 @@ const HomePage = () => {
     }
   }
 
-  const loadMoreBtn = async ()=>{
-        try {
-      const { data, statusText } = await api.get("?page=1&limit=10")
+  const loadMoreBtn = async () => {
+    try {
+      const nextPage = page + 1
+
+      const { data, statusText } = await api.get(`?page=${nextPage}&limit=10`)
       console.log(data)
       if (statusText === "OK") {
-        setCards(data.blogs)
+        setCards(prev => [...prev, ...data.blogs])
+        setPage(nextPage)
+        if (data.totalPages <= nextPage) {
+          setAllCard(true)
+
+        }
       }
+
     } catch (error) {
       console.error(error)
     }
+  }
+
+  const showLess = () => {
+    setCards(cards.slice(0, 10))
+    setPage(1)
+    setAllCard(false)
   }
 
   useEffect(() => {
@@ -47,7 +65,7 @@ const HomePage = () => {
           ))}
         </div>
         <div className="">
-          <button  className="text-[#696A75] border-2 border-[#696A754D]/40  rounded-lg h-13 w-33 text-sm mt-10 cursor-pointer">Load More</button>
+          <button onClick={allCard ? showLess : loadMoreBtn} className="text-[#696A75] border-2 border-[#696A754D]/40  rounded-lg h-13 w-33 text-sm mt-10 cursor-pointer">{allCard ? "Show Less" : "Load More"}</button>
         </div>
       </div>
 

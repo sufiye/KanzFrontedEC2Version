@@ -1,5 +1,8 @@
+
 import { Link } from "react-router-dom"
+
 const Navbar = () => {
+
   return (
     <>
       <div className="pt-5 flex items-center justify-center gap-50">

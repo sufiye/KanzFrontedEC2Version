@@ -13,7 +13,7 @@ const Card = ({card}) => {
                 <div className="bg-zinc-100 w-fit p-1 rounded-sm"><p className="text-xs text-blue-400 font-medium">{card.category}</p></div>
                 <h1 className="text-xl font-medium line-clamp-2" >{card.title}</h1>
                 <div className="flex gap-3  text-xs text-zinc-400">
-                    <p>{card.user.email}</p>
+                    <Link  to={`/myblogs/${card?.user?._id}`}><button className="cursor-alias">{card.user.email}</button></Link>
                     <p>{new Date(card.createdAt).toLocaleDateString()}</p>
                 </div>
 

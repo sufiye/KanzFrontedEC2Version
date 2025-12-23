@@ -12,6 +12,7 @@ const Navigator = () => {
   return (
    <Routes>
     <Route path="/" element={<HomePage/>} />
+    <Route path="/category/:category" element={<HomePage/>} />
     <Route path="/login" element={<Login/>} />
     <Route path="/register" element={<Register/>} />
     <Route path="/newBlog" element={<AddNewBlog/>} />

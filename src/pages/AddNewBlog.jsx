@@ -3,9 +3,9 @@ import Footer from "../components/Footer"
 import { useState, useEffect } from "react"
 import api from "../utils/axios"
 import toast from "react-hot-toast"
-
+import { useDarkmode } from "../stores/store"
 const AddNewBlog = () => {
-
+    const { isDarkmodeEnabled } = useDarkmode()
     const [category, setCategory] = useState([])
     const [formData, setFormData] = useState({ title: "", description: "", category: "", image: "" })
 
@@ -49,29 +49,29 @@ const AddNewBlog = () => {
 
 
     return (
-        <div className="h-screen w-full">
+        <div className={`w-full h-fit ${isDarkmodeEnabled ? "bg-[#181A2A]":"bg-white"}`}>
             <Navbar />
             <div className="h-fit my-20 flex justify-center items-center flex-col space-y-5">
-                <h1 className="text-4xl font-bold mb-13 text-[#232536]">Write a new blog</h1>
+                <h1 className={`text-4xl font-bold mb-13 text-[#232536] ${isDarkmodeEnabled?"text-white":"text-black"}`}>Write a new blog</h1>
                 <input value={formData?.title} onChange={(e) => {
                     handleInputChange("title", e.target.value)
-                }} className=" border w-140 h-13 p-4  border-zinc-300 text-sm placeholder:text-[#232536]" placeholder="Add title for blog" type="text"></input>
+                }} className= {`border w-140 h-13 p-4  border-zinc-300 text-sm ${isDarkmodeEnabled?"placeholder:text-zinc-400 text-white":"placeholder:text-zinc-500 text-black"}`} placeholder="Add title for blog" type="text"></input>
                 <select value={formData?.category} onChange={(e) => {
                     handleInputChange("category", e.target.value)
-                }} className=" border w-140 h-13 p-4  border-zinc-300 text-sm text-[#232536]" name="" id="">
-                    <option value="" disabled>Select category</option>
+                }} className={`border w-140 h-13 p-4  border-zinc-300 text-sm ${isDarkmodeEnabled?"text-zinc-400 ":"text-zinc-500"}`} name="" id="">
+                    <option className={`${isDarkmodeEnabled ? "bg-[#181A2A] text-zinc-400":"bg-white text-zinc-500"}`} value="" disabled>Select category</option>
                     {category.map((item) => (
-                        <option key={item} value={item}>
+                        <option className={`${isDarkmodeEnabled ? "bg-[#181A2A] text-zinc-400":"bg-white text-zinc-500"}`} key={item} value={item}>
                             {item}
                         </option>
                     ))}
                 </select>
                 <input value={formData?.image} onChange={(e) => {
                     handleInputChange("image", e.target.value)
-                }} className=" border w-140 h-13 p-4  border-zinc-300 text-sm placeholder:text-[#232536]" placeholder="Add thumbnail image" type="text" />
+                }} className= {`border w-140 h-13 p-4  border-zinc-300 text-sm ${isDarkmodeEnabled?"placeholder:text-zinc-400 text-white":"placeholder:text-zinc-500 text-black"}`}  placeholder="Add thumbnail image" type="text" />
                 <textarea value={formData?.description} onChange={(e) => {
                     handleInputChange("description", e.target.value)
-                }} className="h-50 w-140 border p-4  border-zinc-300 text-sm placeholder:text-[#232536]" placeholder="Add blog body" name="" id=""></textarea>
+                }} className= {`border w-140 h-50 p-4  border-zinc-300 text-sm ${isDarkmodeEnabled?"placeholder:text-zinc-400 text-white":"placeholder:text-zinc-500 text-black"}`}  placeholder="Add blog body" name="" id=""></textarea>
                 <button onClick={addNewBlog} className="bg-[#FFD050] w-140 h-15 "><h1 className="text-xl font-bold text-[#232536] cursor-pointer" >Submit</h1></button>
             </div>
             <Footer />

@@ -3,20 +3,27 @@ import Footer from "../components/Footer"
 import Card from "../components/Card"
 import BigCard from "../components/BigCard"
 import api from "../utils/axios"
+import { Link } from "react-router-dom"
 import { useState, useEffect } from "react"
+import{useDarkmode} from "../stores/store"
 const HomePage = () => {
+
   const [cards, setCards] = useState([])
   const [allCard, setAllCard] = useState(false)
   const [page, setPage] = useState(1)
+  const [searchterm, setSearchterm] = useState("")
+  const {isDarkmodeEnabled} = useDarkmode()
 
 
 
   const getCards = async () => {
     try {
-      const { data, statusText } = await api.get("?page=1&limit=10")
+      const { data, statusText } = await api.get(searchterm.length > 2 ? `?search=${searchterm}` : "?page=1&limit=10")
       console.log(data)
       if (statusText === "OK") {
-        setCards(data.blogs)
+        setCards(searchterm.length >= 3 ? data.blogs : data.blogs)
+        console.log(data);
+
       }
     } catch (error) {
       console.error(error)
@@ -51,21 +58,25 @@ const HomePage = () => {
 
   useEffect(() => {
     getCards()
-  }, [])
+  }, [searchterm])
 
   return (
-    <div className="w-full h-screen">
-      <Navbar />
+    <div className={`w-full h-fit ${isDarkmodeEnabled ? "bg-[#181A2A]":"bg-white"}`}>
+      <Navbar searchterm={searchterm} setSearchterm={setSearchterm} />
       <div className=" flex justify-center items-center flex-col my-20">
         <div className="grid grid-cols-3 gap-5 ">
           {cards.map((card, index) => (
-            index === 0
+            index === 0 && searchterm.length < 2
               ? <BigCard key={card._id} card={card} />
               : <Card key={card._id} card={card} />
+
           ))}
+
         </div>
-        <div className="">
-          <button onClick={allCard ? showLess : loadMoreBtn} className="text-[#696A75] border-2 border-[#696A754D]/40  rounded-lg h-13 w-33 text-sm mt-10 cursor-pointer">{allCard ? "Show Less" : "Load More"}</button>
+        <div >
+          {searchterm ? "" :
+            <button onClick={allCard ? showLess : loadMoreBtn} className={` border-2  rounded-lg 
+          h-13 w-33 text-sm mt-10 cursor-pointer ${isDarkmodeEnabled?"text-zinc-300 border-zinc-400":"text-[#696A75] border-[#696A754D]/40"}`}>{allCard ? "Show Less" : "Load More"}</button>}
         </div>
       </div>
 

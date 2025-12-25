@@ -25,7 +25,7 @@ const Navbar = () => {
 
         <button className={`w-11 h-7 flex items-center bg-zinc-200  rounded-full p-1 cursor-pointer`} onClick={toggleDarkmode}>
           <div className={`bg-white w-5 h-5 rounded-full shadow-md transform duration-300  ${isDarkmodeEnabled ? "translate-x-4" : ""} `}>
-            {isDarkmodeEnabled ? "d" : "l"}
+             {isDarkmodeEnabled ? <img src="src\assets\moon.png" alt="" />:<img src="src\assets\sun.png" alt="" /> }
           </div>
         </button>
       </div>

@@ -1,8 +1,12 @@
 
 import { Link } from "react-router-dom"
 import{useDarkmode} from "../stores/store"
+
+
 const Navbar = ({ searchterm, setSearchterm }) => {
+
 const {toggleDarkmode,isDarkmodeEnabled} = useDarkmode()
+
   return (
     <>
       <div className={`pt-5 flex items-center justify-center gap-50 ${isDarkmodeEnabled ? "bg-[#181A2A]":"bg-white"}`}>

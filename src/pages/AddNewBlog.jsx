@@ -34,6 +34,7 @@ const AddNewBlog = () => {
             if (statusText === "OK") {
                 console.log(data);
                 toast.success("Blog added successfully : )")
+                setFormData({ title: "", description: "", category: "", image: "" })
             }
 
         } catch (error) {

@@ -4,8 +4,10 @@ import { useState, useEffect } from "react"
 import api from "../utils/axios"
 import toast from "react-hot-toast"
 import { useDarkmode } from "../stores/store"
+import { useNavigate } from "react-router-dom"
 const AddNewBlog = () => {
     const { isDarkmodeEnabled } = useDarkmode()
+    const navigate = useNavigate()
     const [category, setCategory] = useState([])
     const [formData, setFormData] = useState({ title: "", description: "", category: "", image: "" })
 
@@ -45,6 +47,11 @@ const AddNewBlog = () => {
 
 
     useEffect(() => {
+        const token = localStorage.getItem("tokens")
+        if (!token) {
+            navigate("/login")
+            return
+        }
         getCategory()
     }, [])
 

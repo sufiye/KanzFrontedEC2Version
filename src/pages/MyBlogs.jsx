@@ -5,12 +5,14 @@ import api from "../utils/axios"
 import Card from "../components/Card"
 import { useParams } from "react-router-dom"
 import { useDarkmode } from "../stores/store"
+import { useNavigate } from "react-router-dom"
 const MyBlogs = () => {
   const { isDarkmodeEnabled } = useDarkmode()
   const { id } = useParams()
   const [deleteblog, setDeleteblog] = useState(false)
   const [visibleCount, setVisibleCount] = useState(10)
   const [blogs, setBlogs] = useState([])
+  const navigate = useNavigate()
 
   const visibleBlogs = blogs.slice(0, visibleCount)
 
@@ -31,14 +33,22 @@ const MyBlogs = () => {
         setBlogs(data)
         console.log(data);
       }
+    
     } catch (error) {
       console.error(error)
     }
   }
 
-  useEffect(() => {
-    getBlogs()
-  }, [id])
+useEffect(() => {
+  const token = localStorage.getItem("tokens")
+
+  if (!token) {
+    navigate("/login")
+    return
+  }
+
+  getBlogs()
+}, [id])
 
   return (
     <>

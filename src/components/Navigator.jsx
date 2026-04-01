@@ -3,9 +3,9 @@ import HomePage from "../pages/HomePage"
 import NotFound from "../pages/NotFound"
 import Login from "../pages/Login"
 import Register from "../pages/Register"
-import AddNewBlog from "../pages/AddNewBlog"
 import Details from "../pages/Details"
-import MyBlogs from "../pages/MyBlogs"
+import BasketItems from "../pages/BasketItems"
+import Order from "../pages/Order"
 
 
 const Navigator = () => {
@@ -15,9 +15,9 @@ const Navigator = () => {
     <Route path="/category/:category" element={<HomePage/>} />
     <Route path="/login" element={<Login/>} />
     <Route path="/register" element={<Register/>} />
-    <Route path="/newBlog" element={<AddNewBlog/>} />
-    <Route path="/myBlogs" element={<MyBlogs/>} />
-    <Route path="/myBlogs/:id" element={<MyBlogs />} />
+    <Route path="/basketItems" element={<BasketItems/>} />
+    <Route path="/basketItems/:id" element={<BasketItems/>} />
+    <Route path="/orders" element={<Order/>} />
     <Route path="/details/:id" element={<Details/>} />
     <Route path="*" element={<NotFound/>} />
 

@@ -44,29 +44,95 @@ const Register = () => {
 
 
     return (
-        <div className={`w-full h-fit ${isDarkmodeEnabled ? "bg-[#181A2A]" : "bg-white"}`}>
-            <NavbarLr />
-            <div className="h-fit my-20 flex justify-center items-center flex-col space-y-5">
+      <div className={`w-full min-h-screen ${isDarkmodeEnabled ? "bg-[#181A2A]" : "bg-pink-50"} transition-all`}>
 
-                <h1 className={`text-4xl font-bold mb-16 ${isDarkmodeEnabled ? "text-white" : "text-[#232536]"}`}>Register</h1>
-                <input value={formData?.firstname} onChange={(e) => {
-                    handleInputChange("firstname", e.target.value)
-                }}  className={`border w-140 h-13 p-4 border-zinc-300  text-sm ${isDarkmodeEnabled ? "placeholder:text-zinc-400 text-white" : "placeholder:text-[#232536] text-black"}`} placeholder="Enter your firstname" type="text" />
-                <input value={formData?.lastname} onChange={(e) => {
-                    handleInputChange("lastname", e.target.value)
-                }}  className={`border w-140 h-13 p-4 border-zinc-300  text-sm ${isDarkmodeEnabled ? "placeholder:text-zinc-400 text-white" : "placeholder:text-[#232536] text-black"}`} placeholder="Enter your lastname" type="text" />
-                <input value={formData?.email} onChange={(e) => {
-                    handleInputChange("email", e.target.value)
-                }}  className={`border w-140 h-13 p-4 border-zinc-300  text-sm ${isDarkmodeEnabled ? "placeholder:text-zinc-400 text-white" : "placeholder:text-[#232536] text-black"}`} placeholder="Enter your email" type="email" name="" id="" />
-                <input value={formData?.password} onChange={(e) => {
-                    handleInputChange("password", e.target.value)
-                }} className={`border w-140 h-13 p-4 border-zinc-300  text-sm ${isDarkmodeEnabled ? "placeholder:text-zinc-400 text-white" : "placeholder:text-[#232536] text-black"}`} placeholder="Enter your password" type="password" name="" id="" />
-                <Link to={"/login"}> <button className={`text-sm  mr-100 underline cursor-pointer ${isDarkmodeEnabled ? "text-blue-400" : "text-blue-500"}`} >Already have an account?</button></Link>
-                <button onClick={handleRegister} className="bg-[#FFD050] w-140 h-15 "><h1 className="text-xl font-bold text-[#232536] cursor-pointer">Register</h1></button>
-            </div>
+    <NavbarLr />
 
-            <Footer />
-        </div>
+    <div className="my-20 flex justify-center items-center flex-col space-y-6">
+
+        {/* Title */}
+        <h1 className="text-4xl font-extrabold mb-10 pb-2 bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 bg-clip-text text-transparent">
+            Register
+        </h1>
+
+        {/* Firstname */}
+        <input
+            value={formData?.firstname}
+            onChange={(e) => handleInputChange("firstname", e.target.value)}
+            className={`w-140 h-13 p-4 rounded-xl border border-pink-200 shadow-sm
+            focus:outline-none focus:ring-2 focus:ring-pink-400 transition
+            ${isDarkmodeEnabled
+                ? "bg-[#232536] placeholder:text-zinc-400 text-white"
+                : "bg-white placeholder:text-zinc-500 text-black"
+            }`}
+            placeholder="Enter your firstname"
+            type="text"
+        />
+
+        {/* Lastname */}
+        <input
+            value={formData?.lastname}
+            onChange={(e) => handleInputChange("lastname", e.target.value)}
+            className={`w-140 h-13 p-4 rounded-xl border border-pink-200 shadow-sm
+            focus:outline-none focus:ring-2 focus:ring-pink-400 transition
+            ${isDarkmodeEnabled
+                ? "bg-[#232536] placeholder:text-zinc-400 text-white"
+                : "bg-white placeholder:text-zinc-500 text-black"
+            }`}
+            placeholder="Enter your lastname"
+            type="text"
+        />
+
+        {/* Email */}
+        <input
+            value={formData?.email}
+            onChange={(e) => handleInputChange("email", e.target.value)}
+            className={`w-140 h-13 p-4 rounded-xl border border-pink-200 shadow-sm
+            focus:outline-none focus:ring-2 focus:ring-pink-400 transition
+            ${isDarkmodeEnabled
+                ? "bg-[#232536] placeholder:text-zinc-400 text-white"
+                : "bg-white placeholder:text-zinc-500 text-black"
+            }`}
+            placeholder="Enter your email"
+            type="email"
+        />
+
+        {/* Password */}
+        <input
+            value={formData?.password}
+            onChange={(e) => handleInputChange("password", e.target.value)}
+            className={`w-140 h-13 p-4 rounded-xl border border-pink-200 shadow-sm
+            focus:outline-none focus:ring-2 focus:ring-pink-400 transition
+            ${isDarkmodeEnabled
+                ? "bg-[#232536] placeholder:text-zinc-400 text-white"
+                : "bg-white placeholder:text-zinc-500 text-black"
+            }`}
+            placeholder="Enter your password"
+            type="password"
+        />
+
+        {/* Login link */}
+        <Link to={"/login"}>
+            <button className="text-sm text-pink-500 underline hover:text-pink-600 transition cursor-pointer">
+                Already have an account?
+            </button>
+        </Link>
+
+        {/* Register Button */}
+        <button
+            onClick={handleRegister}
+            className="w-140 h-14 rounded-xl bg-gradient-to-r 
+            from-pink-400 to-pink-600 text-white text-lg font-bold 
+            shadow-md hover:scale-105 hover:shadow-pink-300 transition duration-300 cursor-pointer"
+        >
+            Register
+        </button>
+
+    </div>
+
+    <Footer />
+
+</div>
     )
 }
 

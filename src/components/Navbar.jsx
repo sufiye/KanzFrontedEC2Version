@@ -1,56 +1,124 @@
-
 import { Link } from "react-router-dom"
-import{useDarkmode} from "../stores/store"
-
+import { useDarkmode } from "../stores/store"
 
 const Navbar = ({ searchterm, setSearchterm }) => {
 
-const {toggleDarkmode,isDarkmodeEnabled} = useDarkmode()
+  const { toggleDarkmode, isDarkmodeEnabled } = useDarkmode()
 
   return (
-    <>
-      <div className={`pt-5 flex items-center justify-center gap-50 ${isDarkmodeEnabled ? "bg-[#181A2A]":"bg-white"}`}>
+    <div
+      className={`pt-5 pb-5 flex items-center justify-center gap-40 transition-all
+      ${isDarkmodeEnabled
+          ? "bg-[#181A2A]"
+          : "bg-gradient-to-r from-pink-50 via-white to-pink-50"
+        }`}
+    >
 
-        <div className="flex items-center gap-2">
-          {isDarkmodeEnabled?<img src="..\src\assets\Logolight.png" alt="" />:
-          <img src="..\src\assets\Logo1.png" alt="" />
-          }
+      {/* Logo */}
+       <div className="flex items-center gap-2">
+        <h1
+          className={`text-3xl font-extrabold tracking-widest bg-gradient-to-r
+          ${isDarkmodeEnabled
+              ? "from-pink-300 to-pink-500"
+              : "from-pink-600 to-pink-800"}
+          bg-clip-text text-transparent drop-shadow-lg`}
+        >
+          Kanz
+        </h1>
+      </div>
+
+      <div className="flex items-center gap-20">
+
+        {/* Navigation */}
+        <div
+          className={`flex items-center gap-10 text-lg font-semibold
+          ${isDarkmodeEnabled ? "text-gray-200" : "text-gray-700"}`}
+        >
+
+          <Link to={"/"} className="group relative">
+            <span className="cursor-pointer transition group-hover:text-pink-500">
+              Home
+            </span>
+            <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-pink-500 transition-all duration-300 group-hover:w-full"></span>
+          </Link>
+
+          <Link to={"/BasketItems"} className="group relative">
+            <span className="cursor-pointer transition group-hover:text-pink-500">
+              Basket
+            </span>
+            <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-pink-500 transition-all duration-300 group-hover:w-full"></span>
+          </Link>
+
+          <Link to={"/orders"} className="group relative">
+            <span className="cursor-pointer transition group-hover:text-pink-500">
+              Order
+            </span>
+            <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-pink-500 transition-all duration-300 group-hover:w-full"></span>
+          </Link>
+
+          <a href="#contact" className="group relative">
+            <span className="cursor-pointer transition group-hover:text-pink-500">
+              Contact
+            </span>
+            <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-pink-500 transition-all duration-300 group-hover:w-full"></span>
+          </a>
+
         </div>
 
-        <div className="flex items-center gap-20">
+        {/* Right Side */}
+        <div className="flex items-center gap-5">
 
-          <div className={`flex items-center gap-8 ${isDarkmodeEnabled? "text-white":"text-black"}`}>
-            <Link to={"/"}><button className="cursor-pointer">Home</button></Link>
-            <Link to={"/newBlog"}><button className="cursor-pointer">Write a Blog</button></Link>
-            <Link to={"/myBlogs"}><button className="cursor-pointer">My Blogs</button></Link>
-            <a href="#contact" >Contact</a>
+          {/* Search */}
+          <div className="relative">
+            <input
+              className={`rounded-xl w-[180px] pl-4 pr-10 p-2 border border-pink-200
+              focus:outline-none focus:ring-2 focus:ring-pink-400 transition
+              ${isDarkmodeEnabled
+                  ? "bg-[#242535] placeholder:text-zinc-400 text-white"
+                  : "bg-white text-black"
+                }`}
+              placeholder="Search"
+              type="search"
+              value={searchterm}
+              onChange={(e) => setSearchterm(e.target.value)}
+            />
+            <img
+              className="absolute right-3 top-2.5 w-4 opacity-60"
+              src="../src/assets/search.png"
+            />
           </div>
 
-          <div className="flex items-center gap-5">
-
-            <div className="relative">
-
-              <input className={` rounded-sm w-[166px] pl-4 p-2 ${isDarkmodeEnabled?"bg-[#242535] placeholder:text-zinc-500 text-white":"bg-zinc-100 text-black"}`} placeholder="Search" type="search" value={searchterm} onChange={(e) => {
-                setSearchterm(e.target.value)
-              }} />
-              <img className="absolute right-3 top-3" src="..\src\assets\search.png" alt="" />
+          {/* Darkmode toggle */}
+          <button
+            className="w-12 h-7 flex items-center bg-pink-200 rounded-full p-1 cursor-pointer"
+            onClick={toggleDarkmode}
+          >
+            <div
+              className={`bg-white w-5 h-5 rounded-full shadow-md transform duration-300 flex items-center justify-center
+              ${isDarkmodeEnabled ? "translate-x-5" : ""}`}
+            >
+              {isDarkmodeEnabled ?
+                <img src="src/assets/moon.png" className="w-3" /> :
+                <img src="src/assets/sun.png" className="w-3" />}
             </div>
+          </button>
 
-            <button className={`w-11 h-7 flex items-center bg-zinc-200  rounded-full p-1 cursor-pointer`} onClick={toggleDarkmode}>
-              <div className={`bg-white w-5 h-5 rounded-full shadow-md transform duration-300  ${isDarkmodeEnabled ? "translate-x-4" : ""} `}>
-                {isDarkmodeEnabled ? <img src="src\assets\moon.png" alt="" />:<img src="src\assets\sun.png" alt="" /> }
-              </div>
+          {/* Sign in */}
+          <Link to={"/login"}>
+            <button
+              className="h-[38px] px-5 rounded-xl bg-gradient-to-r
+              from-pink-400 to-pink-600 text-white font-semibold
+              shadow-md hover:scale-105 hover:shadow-pink-300 transition"
+            >
+              Sign In
             </button>
-
-            <Link to={"/login"}><button className={`bg-black text-white h-[36px] w-[68px] rounded-sm `}>Sing In</button></Link>
-
-          </div>
+          </Link>
 
         </div>
-
 
       </div>
-    </>
+
+    </div>
   )
 }
 

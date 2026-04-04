@@ -1,7 +1,7 @@
 import Navbar from "../components/Navbar"
 import Footer from "../components/Footer"
 import { useState, useEffect } from "react"
-import api from "../utils/axios"
+// import api from "../utils/axios"
 import toast from "react-hot-toast"
 import { useDarkmode } from "../stores/store"
 import { useNavigate } from "react-router-dom"

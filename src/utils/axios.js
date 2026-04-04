@@ -4,7 +4,7 @@ import { useTokens } from "../stores/tokenStore.js";
 import { refreshTokens } from "./utils.js";
 
 const api = axios.create({
-    baseURL: 'https://ilkinibadov.com/api/b/blogs',
+    baseURL: 'http://localhost:5064/api',
     timeout: 10000,
     headers: {
         'Content-Type': 'application/json',

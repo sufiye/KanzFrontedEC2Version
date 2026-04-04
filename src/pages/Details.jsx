@@ -1,6 +1,5 @@
 import { useParams } from "react-router-dom"
 import { useState, useEffect } from "react"
-import api from "../utils/axios"
 import Navbar from "../components/Navbar"
 import Footer from "../components/Footer"
 import { Link } from "react-router-dom"
@@ -13,7 +12,7 @@ const Details = () => {
 
   const getCards = async () => {
     try {
-      const { data, statusText } = await api.get(`https://ilkinibadov.com/api/b/blogs/blog/${id}`)
+      const { data, statusText } = await api.get(``)
       console.log(data)
       if (statusText === "OK") {
         setCard(data)

@@ -1,111 +1,106 @@
-import Navbar from "../components/Navbar"
-import Footer from "../components/Footer"
-import Card from "../components/Card"
-import BigCard from "../components/BigCard"
-import api from "../utils/axios"
-import { useParams } from "react-router-dom"
-import { useState, useEffect } from "react"
-import { useDarkmode } from "../stores/store"
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import Card from "../components/Card";
+import BigCard from "../components/BigCard";
+import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useDarkmode } from "../stores/store";
+
+const API_URL = "http://localhost:5064/api";
+
 const HomePage = () => {
+  const [products, setProducts] = useState([]);
+  const [allLoaded, setAllLoaded] = useState(false);
+  const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const { isDarkmodeEnabled } = useDarkmode();
+  const { category } = useParams();
 
-  const [cards, setCards] = useState([])
-  const [allCard, setAllCard] = useState(false)
-  const [page, setPage] = useState(1)
-  const [searchterm, setSearchterm] = useState("")
-  const { isDarkmodeEnabled } = useDarkmode()
-  const { category } = useParams()
-
-
-
-  const getCards = async () => {
+  // Products gətirmək
+  async function getProducts() {
     try {
+      let url = `${API_URL}/Product?page=1&limit=10`;
 
-      let url = "?page=1&limit=10"
+      if (category) url += `&category=${category}`;
+      if (searchTerm.length >= 3) url += `&search=${searchTerm}`;
 
-      if (searchterm.length >= 3) {
-        url += `&search=${searchterm}`
-      }
+      const res = await fetch(url);
+      const data = await res.json();
 
-      if (category) {
-        url += `&category=${category}`
-      }
-
-      const { data, statusText } = await api.get(url)
-
-      console.log(data)
-
-      if (statusText === "OK") {
-
-        setCards(data.blogs)
-        console.log(data);
-
-      }
+      setProducts(data.products || data);
+      setPage(1);
+      setAllLoaded(false);
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
   }
 
-  const loadMoreBtn = async () => {
+  // Load more
+  const loadMore = async () => {
     try {
+      const nextPage = page + 1;
 
-      const nextPage = page + 1
-      let url = `?page=${nextPage}&limit=10`
-      if (category) {
-        url+= `&category=${category}`
-      }
+      let url = `${API_URL}/Product`;
 
-      const { data, statusText } = await api.get(url)
-      console.log(data)
+      if (category) url += `&category=${category}`;
+      if (searchTerm.length >= 3) url += `&search=${searchTerm}`;
 
-      if (statusText === "OK") {
-        setCards(prev => [...prev, ...data.blogs])
-        setPage(nextPage)
+      const res = await fetch(url);
+      const data = await res.json();
 
-        if (data.totalPages <= nextPage) {
-          setAllCard(true)
+      console.log(data.data)
+      setProducts(prev => [...prev, ...(data.products || data)]);
+      setPage(nextPage);
 
-        }
+      if (data.totalPages && data.totalPages <= nextPage) {
+        setAllLoaded(true);
       }
 
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
-  }
+  };
 
   const showLess = () => {
-    setCards(cards.slice(0, 10))
-    setPage(1)
-    setAllCard(false)
-  }
+    setProducts(products.slice(0, 10));
+    setPage(1);
+    setAllLoaded(false);
+  };
 
   useEffect(() => {
-    getCards()
-  }, [searchterm, category])
+    getProducts();
+  }, [searchTerm, category]);
 
   return (
     <div className={`w-full h-fit ${isDarkmodeEnabled ? "bg-[#181A2A]" : "bg-white"}`}>
-      <Navbar searchterm={searchterm} setSearchterm={setSearchterm} />
-      <div className=" flex justify-center items-center flex-col my-20">
-        <div className="grid grid-cols-3 gap-5 ">
+      <Navbar searchterm={searchTerm} setSearchterm={setSearchTerm} />
 
-          {cards.map((card, index) => (
-            index === 0 && searchterm.length < 2
-              ? <BigCard key={card._id} card={card} />
-              : <Card key={card._id} card={card} />
-
-          ))}
-
+      <div className="flex justify-center items-center flex-col my-20">
+        <div className="grid grid-cols-3 gap-5">
+          {products.map((product, index) =>
+              (
+              <Card key={product.id} card={product} />
+            )
+          )}
         </div>
-        <div >
-          {searchterm ? "" :
-            <button onClick={allCard ? showLess : loadMoreBtn} className={` border-2  rounded-lg 
-          h-13 w-33 text-sm mt-10 cursor-pointer ${isDarkmodeEnabled ? "text-zinc-300 border-zinc-400" : "text-[#696A75] border-[#696A754D]/40"}`}>{allCard ? "Show Less" : "Load More"}</button>}
-        </div>
+
+        {!searchTerm && (
+          <button
+            onClick={allLoaded ? showLess : loadMore}
+            className={`border-2 rounded-lg h-13 w-33 text-sm mt-10 cursor-pointer ${
+              isDarkmodeEnabled
+                ? "text-zinc-300 border-zinc-400"
+                : "text-[#696A75] border-[#696A754D]/40"
+            }`}
+          >
+            {allLoaded ? "Show Less" : "Load More"}
+          </button>
+        )}
       </div>
 
       <Footer />
     </div>
-  )
-}
+  );
+};
 
-export default HomePage
+export default HomePage;

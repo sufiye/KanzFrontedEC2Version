@@ -6,7 +6,7 @@ export const refreshTokens = async ()=>{
         const refreshToken = useTokens.getState().refreshToken
         const setAccessToken = useTokens.getState().setAccessToken
         
-        const {data,statusText} = await axios.post("https://ilkinibadov.com/api/b/auth/refresh",{refreshToken})
+        const {data,statusText} = await axios.post("http://localhost:5064/api/Auth/refreshToken",{refreshToken})
         if (statusText === "OK") {
             setAccessToken(data.accessToken)
             return data.accessToken

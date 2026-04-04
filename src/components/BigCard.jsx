@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom"
 import { useDarkmode } from "../stores/store"
 import { useNavigate } from "react-router-dom"
+
 const BigCard = ({ card }) => {
   const { isDarkmodeEnabled } = useDarkmode()
   const navigate = useNavigate()

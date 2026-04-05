@@ -1,7 +1,6 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import Card from "../components/Card";
-import BigCard from "../components/BigCard";
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useDarkmode } from "../stores/store";
@@ -16,26 +15,25 @@ const HomePage = () => {
   const { isDarkmodeEnabled } = useDarkmode();
   const { category } = useParams();
 
-  // Products gətirmək
+
   async function getProducts() {
     try {
       let url = `${API_URL}/Product?page=1&limit=10`;
 
-      if (category) url += `&category=${category}`;
-      if (searchTerm.length >= 3) url += `&search=${searchTerm}`;
-
       const res = await fetch(url);
       const data = await res.json();
 
-      setProducts(data.products || data);
+      console.log(data);
+      
+      setProducts(data);
       setPage(1);
       setAllLoaded(false);
+
     } catch (error) {
       console.error(error);
     }
   }
 
-  // Load more
   const loadMore = async () => {
     try {
       const nextPage = page + 1;
@@ -77,10 +75,8 @@ const HomePage = () => {
 
       <div className="flex justify-center items-center flex-col my-20">
         <div className="grid grid-cols-3 gap-5">
-          {products.map((product, index) =>
-              (
-              <Card key={product.id} card={product} />
-            )
+          {products.map((product) =>
+                    <Card key={product.id} product={product} />
           )}
         </div>
 

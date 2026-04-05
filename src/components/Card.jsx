@@ -1,13 +1,7 @@
 import { useDarkmode } from "../stores/store";
-import { useNavigate } from "react-router-dom";
 
-const CartCard = ({ product, removeFromCart }) => {
+const CartCard = ({ product }) => {
   const { isDarkmodeEnabled } = useDarkmode();
-  const navigate = useNavigate();
-
-  const handleRemove = () => {
-    removeFromCart(product.id);
-  };
 
   const imageUrl =
     product?.attachments?.length > 0
@@ -24,30 +18,8 @@ const CartCard = ({ product, removeFromCart }) => {
       <img
         className="w-full h-[200px] object-cover rounded-xl"
         src={imageUrl}
-        alt={product?.data.name}
+        alt={product?.orginalFileName}
       />
-
-      {/* Remove button */}
-      <div className="absolute top-2 right-2 cursor-pointer">
-        <div
-          className={`border rounded-full p-1 ${
-            isDarkmodeEnabled
-              ? "bg-[#181A2A] border-white"
-              : "bg-white border-black"
-          }`}
-          onClick={handleRemove}
-        >
-          <img
-            className="h-5 w-5"
-            src={
-              isDarkmodeEnabled
-                ? "/src/assets/trashWhite.png"
-                : "/src/assets/trash.png"
-            }
-            alt="Remove"
-          />
-        </div>
-      </div>
 
       {/* Product info */}
       <h1
@@ -72,7 +44,7 @@ const CartCard = ({ product, removeFromCart }) => {
             isDarkmodeEnabled ? "text-white" : "text-black"
           }`}
         >
-          ${product?.price?.toFixed(2)}
+          {product?.price?.toFixed(2)} azn
         </p>
 
         <p

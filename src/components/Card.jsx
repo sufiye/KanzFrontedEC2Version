@@ -1,12 +1,31 @@
+import { useState, useEffect } from "react";
 import { useDarkmode } from "../stores/store";
 
+const API_URL = "http://localhost:5064/api";
+
 const CartCard = ({ product }) => {
+  const [image, setImage] = useState("/no-image.png"); 
   const { isDarkmodeEnabled } = useDarkmode();
 
-  const imageUrl =
-    product?.attachments?.length > 0
-      ? product.attachments[0].url
-      : "/no-image.png";
+  async function imageGet(id) {
+    try {
+      const url = `${API_URL}/Attachment/${id}/download`; 
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Image fetch failed");
+      const blob = await res.blob();
+      const imageUrl = URL.createObjectURL(blob);
+      setImage(imageUrl);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+
+  useEffect(() => {
+    if (product?.attachments?.length > 0) {
+      imageGet(product.attachments[0].id);
+    }
+  }, [product]);
 
   return (
     <div
@@ -14,11 +33,11 @@ const CartCard = ({ product }) => {
       ${isDarkmodeEnabled ? "border-zinc-800" : "border-zinc-200"}
       overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg`}
     >
-      {/* Image */}
+
       <img
         className="w-full h-[200px] object-cover rounded-xl"
-        src={imageUrl}
-        alt={product?.orginalFileName}
+        src={image}
+        alt={product?.originalFileName}
       />
 
       {/* Product info */}

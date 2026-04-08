@@ -2,10 +2,13 @@ import NavbarLR from "../components/NavbarLR"
 import Footer from "../components/Footer"
 import { Link, useNavigate } from "react-router-dom"
 import { useTokens } from "../stores/tokenStore"
-import axios from "axios"
 import { useState } from "react"
 import toast from "react-hot-toast"
 import { useDarkmode } from "../stores/store"
+import api from "../utils/axios"
+
+const API_URL = "http://localhost:5064/api"
+
 const Login = () => {
     const navigate = useNavigate()
     const { setAccessToken, setRefreshToken } = useTokens()
@@ -19,29 +22,26 @@ const Login = () => {
         }))
     }
 
-    const handleLogin = async () => {
-        try {
-            const { data, statusText } = await axios.post("https://ilkinibadov.com/api/b/auth/login", formData, {
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            })
+ const handleLogin = async () => {
+    try {
 
-            if (statusText === "OK") {
-                setAccessToken(data.accessToken)
-                setRefreshToken(data.refreshToken)
-                console.log(data);
-                toast.success("success : )")
-                navigate("/")
+        const res = await api.post("/Auth/login", formData)
 
-            }
+        console.log(res.data);
+        
+        
+        setAccessToken(res.data.accessToken)
+        setRefreshToken(res.data.refreshToken)
 
-        } catch (error) {
-            console.error(error)
-            toast.error("Email or password incorrect !")
+        toast.success("Login successful")
+        navigate("/")
 
-        }
+    } catch (error) {
+        toast.error("Email or password incorrect!")
     }
+}
+
+
     return (
        <div className={`w-full min-h-screen ${isDarkmodeEnabled ? "bg-[#181A2A]" : "bg-pink-50"} transition-all`}>
 
@@ -49,7 +49,6 @@ const Login = () => {
 
     <div className="my-20 flex justify-center items-center flex-col space-y-6">
 
-        {/* Title */}
         <h1
             className={`text-4xl font-extrabold pb-2 mb-10 bg-gradient-to-r 
             from-pink-400 via-pink-500 to-pink-600 
@@ -58,7 +57,6 @@ const Login = () => {
             Login
         </h1>
 
-        {/* Email */}
         <input
             value={formData?.email}
             onChange={(e) => {
@@ -74,7 +72,6 @@ const Login = () => {
             type="email"
         />
 
-        {/* Password */}
         <input
             value={formData?.password}
             onChange={(e) => {
@@ -90,7 +87,6 @@ const Login = () => {
             type="password"
         />
 
-        {/* Register link */}
         <Link to={"/register"}>
             <button
                 className="text-sm text-pink-500 underline hover:text-pink-600 transition cursor-pointer "
@@ -99,7 +95,6 @@ const Login = () => {
             </button>
         </Link>
 
-        {/* Login Button */}
         <button
             onClick={handleLogin}
             className="w-140 h-14 rounded-xl bg-gradient-to-r 

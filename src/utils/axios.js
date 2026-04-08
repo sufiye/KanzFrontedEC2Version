@@ -1,89 +1,92 @@
-
 import axios from "axios";
 import { useTokens } from "../stores/tokenStore.js";
 import { refreshTokens } from "./utils.js";
 
 const api = axios.create({
-    baseURL: 'http://localhost:5064/api',
-    timeout: 10000,
-    headers: {
-        'Content-Type': 'application/json',
-    }
-})
+  baseURL: 'http://localhost:5064/api',
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  }
+});
 
 api.interceptors.request.use(
-    (config) => {
-        const setLoading = useTokens.getState().setLoading
-        const accessToken = useTokens.getState().accessToken
-        setLoading(true)
-        if (accessToken) {
-            config.headers.Authorization = `Bearer ${accessToken}`;
-        }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
+  (config) => {
+    const accessToken = useTokens.getState().accessToken;
+    const setLoading = useTokens.getState().setLoading;
+
+    if (setLoading) setLoading(true);
+
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
     }
-)
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 let isRefreshing = false;
 let failedQueue = [];
 
 const processQueue = (error, token = null) => {
-    failedQueue.forEach(prom => {
-        if (error) {
-            prom.reject(error);
-        } else {
-            prom.resolve(token);
-        }
-    });
-    failedQueue = [];
-}
+  failedQueue.forEach(prom => {
+    if (error) prom.reject(error);
+    else prom.resolve(token);
+  });
+  failedQueue = [];
+};
 
+// Response interceptor: refresh token mexanizmi
 api.interceptors.response.use(
-    (response) => {
-        const setLoading = useTokens.getState().setLoading;
-        setLoading(false);
-        return response;
-    },
-    async (error) => {
-        const setLoading = useTokens.getState().setLoading
-        setLoading(false)
-        const clearTokens = useTokens.getState().clearTokens
-        const originalRequest = error.config;
+  response => {
+    const setLoading = useTokens.getState().setLoading;
+    if (setLoading) setLoading(false);
+    return response;
+  },
+  async (error) => {
+    const setLoading = useTokens.getState().setLoading;
+    if (setLoading) setLoading(false);
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
-            originalRequest._retry = true;
+    const originalRequest = error.config;
+    const clearTokens = useTokens.getState().clearTokens;
 
-            if (isRefreshing) {
-                return new Promise((resolve, reject) => {
-                    failedQueue.push({ resolve, reject });
-                }).then(token => {
-                    originalRequest.headers.Authorization = 'Bearer ' + token;
-                    return api(originalRequest);
-                }).catch(err => {
-                    return Promise.reject(err);
-                });
-            }
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
 
-            isRefreshing = true;
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then(token => {
+          originalRequest.headers = {
+            ...originalRequest.headers,
+            Authorization: 'Bearer ' + token
+          };
+          return api(originalRequest);
+        }).catch(err => Promise.reject(err));
+      }
 
-            try {
-                const newToken = await refreshTokens();
-                processQueue(null, newToken)
-                originalRequest.headers.Authorization = 'Bearer ' + newToken;
-                return api(originalRequest)
-            } catch (error) {
-                processQueue(error, null);
-                clearTokens();
-                return Promise.reject(error);
-            }
-            finally {
-                isRefreshing = false;
-            }
-        }
-        return Promise.reject(error);
+      isRefreshing = true;
+
+      try {
+        const newToken = await refreshTokens();
+        processQueue(null, newToken);
+        originalRequest.headers = {
+          ...originalRequest.headers,
+          Authorization: 'Bearer ' + newToken
+        };
+        return api(originalRequest);
+      } catch (err) {
+        processQueue(err, null);
+        if (clearTokens) clearTokens();
+        return Promise.reject(err);
+      } finally {
+        isRefreshing = false;
+      }
     }
-)
 
-export default api
+    return Promise.reject(error);
+  }
+);
+
+export default api;

@@ -1,9 +1,18 @@
 import { Link } from "react-router-dom"
 import { useDarkmode } from "../stores/store"
+import { useTokens } from "../stores/tokenStore"
+import { useNavigate } from "react-router-dom"
 
 const Navbar = ({ searchterm, setSearchterm }) => {
 
   const { toggleDarkmode, isDarkmodeEnabled } = useDarkmode()
+  const { accessToken, clearTokens } = useTokens()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    clearTokens()
+    navigate("/login")
+  }
 
   return (
     <div
@@ -15,7 +24,7 @@ const Navbar = ({ searchterm, setSearchterm }) => {
     >
 
       {/* Logo */}
-       <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2">
         <h1
           className={`text-3xl font-extrabold tracking-widest bg-gradient-to-r
           ${isDarkmodeEnabled
@@ -104,15 +113,30 @@ const Navbar = ({ searchterm, setSearchterm }) => {
           </button>
 
           {/* Sign in */}
-          <Link to={"/login"}>
+          {accessToken ? (
+
             <button
+              onClick={handleLogout}
               className="h-[38px] px-5 rounded-xl bg-gradient-to-r
-              from-pink-400 to-pink-600 text-white font-semibold
-              shadow-md hover:scale-105 hover:shadow-pink-300 transition"
+    from-gray-500 to-gray-700 text-white font-semibold
+    shadow-md hover:scale-105 transition"
             >
-              Sign In
+              Logout
             </button>
-          </Link>
+
+          ) : (
+
+            <Link to={"/login"}>
+              <button
+                className="h-[38px] px-5 rounded-xl bg-gradient-to-r
+      from-pink-400 to-pink-600 text-white font-semibold
+      shadow-md hover:scale-105 hover:shadow-pink-300 transition"
+              >
+                Sign In
+              </button>
+            </Link>
+
+          )}
 
         </div>
 

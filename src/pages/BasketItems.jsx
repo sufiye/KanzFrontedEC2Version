@@ -6,7 +6,6 @@ import { useTokens } from "../stores/tokenStore";
 import api from "../utils/axios";
 import toast from "react-hot-toast";
 
-
 const API_URL = "http://localhost:5064/api";
 
 const BasketItems = () => {
@@ -14,7 +13,6 @@ const BasketItems = () => {
   const { accessToken } = useTokens();
   const [basketItems, setBasketItems] = useState([]);
 
-  // Şəkil fetch funksiyası
   const fetchImage = async (attachmentId) => {
     try {
       const res = await fetch(`${API_URL}/Attachment/${attachmentId}/download`);
@@ -22,12 +20,10 @@ const BasketItems = () => {
       const blob = await res.blob();
       return URL.createObjectURL(blob);
     } catch (error) {
-      console.error(error);
       return "/no-image.png";
     }
   };
 
-  // Basket items yükləmək
   const getBasketItems = async () => {
     if (!accessToken) return;
     try {
@@ -35,9 +31,6 @@ const BasketItems = () => {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
-      console.log(data);
-
-      // Hər item üçün şəkil əlavə et
       const itemsWithImages = await Promise.all(
         (data || []).map(async (item) => {
           const imageUrl = item.product?.attachments?.length
@@ -49,12 +42,10 @@ const BasketItems = () => {
 
       setBasketItems(itemsWithImages);
     } catch (error) {
-      console.error(error);
       toast.error("Failed to load basket items");
     }
   };
 
-  // Basket item silmək
   const removeFromBasket = async (id) => {
     if (!accessToken) return;
     try {
@@ -63,8 +54,7 @@ const BasketItems = () => {
       });
       setBasketItems(prev => prev.filter(item => item.id !== id));
       toast.success("Item removed");
-    } catch (error) {
-      console.error(error);
+    } catch {
       toast.error("Failed to remove item");
     }
   };
@@ -84,76 +74,105 @@ const BasketItems = () => {
   }, [accessToken]);
 
   return (
-    <div className={`w-full min-h-screen ${isDarkmodeEnabled ? "bg-[#181A2A]" : "bg-white"}`}>
+    <div className={`w-full min-h-screen transition
+    ${isDarkmodeEnabled
+        ? "bg-[#1c1814] text-[#e6dccf]"
+        : "bg-[#f4efe7] text-[#3a3835]"
+      }`}>
+
       <Navbar />
 
-      <div className="max-w-6xl mx-auto py-20 px-4">
-        <h1 className={`text-3xl font-bold mb-8 ${isDarkmodeEnabled ? "text-white" : "text-black"}`}>
-          My Basket
+      <div className="max-w-7xl mx-auto py-20 px-6">
+
+        <h1 className="text-2xl tracking-[3px] mb-10">
+          MY BASKET
         </h1>
 
         {basketItems.length === 0 ? (
-          <p className={`${isDarkmodeEnabled ? "text-zinc-300" : "text-gray-700"}`}>
-            Your basket is empty.
-          </p>
+          <p className="opacity-70">Your basket is empty.</p>
         ) : (
-          <>
-            <div className="grid grid-cols-3 gap-6">
+          <div className="grid lg:grid-cols-3 gap-10">
+
+            <div className="lg:col-span-2 space-y-6">
+
               {basketItems.map((item) => (
-                <div key={item.id} className={`relative border rounded-xl p-4 flex flex-col items-center ${isDarkmodeEnabled ? "border-zinc-700 bg-[#232536]" : "border-gray-200 bg-white"}`}>
-
-
-                  <button
-                    onClick={() => removeFromBasket(item.id)}
-                    className={`absolute top-2 right-2 p-2 rounded-full border transition
-    ${isDarkmodeEnabled
-                        ? "bg-pink-600 border-gray-600 hover:bg-pink-800"
-                        : "bg-pink-600 border-gray-200 hover:bg-pink-700"
-                      }`}
-                  >
-                      {isDarkmodeEnabled ? (
-            <img src="/src/assets/trash.white.png" className="w-3" />
-          ) : (
-            <img src="/src/assets/trash.lo.png" className="w-3" />
-          )}
-                  </button>
+                <div
+                  key={item.id}
+                  className={`flex gap-6 p-5 rounded-xl border transition
+                  ${isDarkmodeEnabled
+                      ? "border-[#3a342c] bg-[#26221d]"
+                      : "border-[#e5e0d8] bg-white"
+                    }`}
+                >
 
                   <img
                     src={item.imageUrl}
-                    alt={item.product?.name}
-                    className="w-full h-48 object-cover rounded-lg mb-4"
+                    className="w-28 h-28 object-cover rounded-lg"
                   />
-                  <h2 className={`text-lg font-semibold mb-2 ${isDarkmodeEnabled ? "text-white" : "text-black"}`}>
-                    {item.product?.name}
-                  </h2>
-                  <p className={`text-sm mb-2 ${isDarkmodeEnabled ? "text-zinc-300" : "text-gray-700"}`}>
-                    {item.product?.description}
-                  </p>
-                  <p className={`font-bold mb-2 ${isDarkmodeEnabled ? "text-white" : "text-black"}`}>
-                    {item.product?.price?.toFixed(2)} AZN
-                  </p>
-                  <p className={`text-sm mb-2 ${isDarkmodeEnabled ? "text-zinc-400" : "text-gray-500"}`}>
-                    Quantity: {item.quantity || 1}
-                  </p>
+
+                  <div className="flex flex-col justify-between flex-1">
+
+                    <div>
+                      <h2 className="text-base font-semibold mb-1">
+                        {item.product?.name}
+                      </h2>
+                      <p className="text-xs opacity-70 line-clamp-2">
+                        {item.product?.description}
+                      </p>
+                    </div>
+
+                    <div className="flex justify-between items-center mt-4">
+
+                      <div className="text-sm">
+                        {item.product?.price?.toFixed(2)} AZN × {item.quantity}
+                      </div>
+
+                      <button
+                        onClick={() => removeFromBasket(item.id)}
+                        className="text-xs border px-4 py-2 hover:bg-black hover:text-white transition"
+                      >
+                        REMOVE
+                      </button>
+
+                    </div>
+
+                  </div>
+
                 </div>
               ))}
+
             </div>
 
-            {/* Total and Make Order */}
-            <div className="mt-8 flex justify-between items-center p-4 border-t border-gray-300">
-              <span className={`text-xl font-bold ${isDarkmodeEnabled ? "text-white" : "text-black"}`}>
-                Total: {totalPrice.toFixed(2)} AZN
-              </span>
+            <div
+              className={`h-fit p-6 rounded-xl border
+              ${isDarkmodeEnabled
+                  ? "border-[#3a342c] bg-[#26221d]"
+                  : "border-[#e5e0d8] bg-white"
+                }`}
+            >
+
+              <h2 className="text-lg mb-6 tracking-wide">
+                ORDER SUMMARY
+              </h2>
+
+              <div className="flex justify-between mb-4 text-sm">
+                <span>Total</span>
+                <span>{totalPrice.toFixed(2)} AZN</span>
+              </div>
+
               <button
                 onClick={makeOrder}
-                className={`px-6 py-3 rounded-xl font-bold text-white ${isDarkmodeEnabled ? "bg-pink-600 hover:bg-pink-500" : "bg-pink-500 hover:bg-pink-600"
-                  } transition`}
+                className="w-full border py-3 text-sm tracking-wide transition
+                hover:bg-black hover:text-white"
               >
-                Make Order
+                PLACE ORDER
               </button>
+
             </div>
-          </>
+
+          </div>
         )}
+
       </div>
 
       <Footer />

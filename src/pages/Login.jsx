@@ -22,93 +22,93 @@ const Login = () => {
         }))
     }
 
- const handleLogin = async () => {
-    try {
+    const handleLogin = async () => {
+        try {
+            const res = await api.post("/Auth/login", formData)
 
-        const res = await api.post("/Auth/login", formData)
+            setAccessToken(res.data.accessToken)
+            setRefreshToken(res.data.refreshToken)
 
-        console.log(res.data);
-        
-        
-        setAccessToken(res.data.accessToken)
-        setRefreshToken(res.data.refreshToken)
+            toast.success("Login successful")
+            navigate("/")
 
-        toast.success("Login successful")
-        navigate("/")
-
-    } catch (error) {
-        toast.error("Email or password incorrect!")
+        } catch (error) {
+            toast.error("Email or password incorrect!")
+        }
     }
-}
-
 
     return (
-       <div className={`w-full min-h-screen ${isDarkmodeEnabled ? "bg-[#181A2A]" : "bg-pink-50"} transition-all`}>
+        <div className={`w-full min-h-screen transition-all
+        ${isDarkmodeEnabled
+                ? "bg-[#1c1814] text-[#e6dccf]"
+                : "bg-[#f4efe7] text-[#3a3835]"
+            }`}>
 
-    <NavbarLR />
+            <NavbarLR />
 
-    <div className="my-20 flex justify-center items-center flex-col space-y-6">
+            <div className="flex justify-center items-center my-20 px-4">
 
-        <h1
-            className={`text-4xl font-extrabold pb-2 mb-10 bg-gradient-to-r 
-            from-pink-400 via-pink-500 to-pink-600 
-            bg-clip-text text-transparent`}
-        >
-            Login
-        </h1>
+                {/* CARD */}
+                <div className={`w-full max-w-md p-10 rounded-2xl shadow-sm
+                ${isDarkmodeEnabled
+                        ? "bg-[#26221d]"
+                        : "bg-white"
+                    }`}>
 
-        <input
-            value={formData?.email}
-            onChange={(e) => {
-                handleInputChange("email", e.target.value)
-            }}
-            className={`w-140 h-13 p-4 rounded-xl border border-pink-200 shadow-sm 
-            focus:outline-none focus:ring-2 focus:ring-pink-400 transition
-            ${isDarkmodeEnabled
-                    ? "bg-[#232536] placeholder:text-zinc-400 text-white"
-                    : "bg-white placeholder:text-zinc-500 text-black"
-                }`}
-            placeholder="Enter your email"
-            type="email"
-        />
+                    {/* TITLE */}
+                    <h1 className="text-2xl text-center mb-8 tracking-[3px]">
+                        LOGIN
+                    </h1>
 
-        <input
-            value={formData?.password}
-            onChange={(e) => {
-                handleInputChange("password", e.target.value)
-            }}
-            className={`w-140 h-13 p-4 rounded-xl border border-pink-200 shadow-sm 
-            focus:outline-none focus:ring-2 focus:ring-pink-400 transition
-            ${isDarkmodeEnabled
-                    ? "bg-[#232536] placeholder:text-zinc-400 text-white"
-                    : "bg-white placeholder:text-zinc-500 text-black"
-                }`}
-            placeholder="Enter your password"
-            type="password"
-        />
+                    {/* EMAIL */}
+                    <input
+                        value={formData?.email}
+                        onChange={(e) => handleInputChange("email", e.target.value)}
+                        className={`w-full p-3 mb-4 border rounded-lg text-sm transition
+                        focus:outline-none
+                        ${isDarkmodeEnabled
+                                ? "bg-[#1c1814] border-[#3a342c] text-white placeholder:text-[#a8a093]"
+                                : "bg-[#f9f6f1] border-[#ddd] text-black placeholder:text-gray-500"
+                            }`}
+                        placeholder="Email"
+                        type="email"
+                    />
 
-        <Link to={"/register"}>
-            <button
-                className="text-sm text-pink-500 underline hover:text-pink-600 transition cursor-pointer "
-            >
-                Don’t have an account?
-            </button>
-        </Link>
+                    {/* PASSWORD */}
+                    <input
+                        value={formData?.password}
+                        onChange={(e) => handleInputChange("password", e.target.value)}
+                        className={`w-full p-3 mb-4 border rounded-lg text-sm transition
+                        focus:outline-none
+                        ${isDarkmodeEnabled
+                                ? "bg-[#1c1814] border-[#3a342c] text-white placeholder:text-[#a8a093]"
+                                : "bg-[#f9f6f1] border-[#ddd] text-black placeholder:text-gray-500"
+                            }`}
+                        placeholder="Password"
+                        type="password"
+                    />
 
-        <button
-            onClick={handleLogin}
-            className="w-140 h-14 rounded-xl bg-gradient-to-r 
-            from-pink-400 to-pink-600 text-white text-lg font-bold 
-            shadow-md hover:scale-105 hover:shadow-pink-300 transition duration-300 cursor-pointer"
-        >
-            Login
-        </button>
+                    {/* LINK */}
+                    <Link to={"/register"}>
+                        <p className="text-xs mb-6 opacity-70 hover:opacity-100 cursor-pointer">
+                            Don’t have an account?
+                        </p>
+                    </Link>
 
-    </div>
+                    {/* BUTTON */}
+                    <button
+                        onClick={handleLogin}
+                        className="w-full border py-3 text-sm tracking-wide transition
+                        hover:bg-black hover:text-white"
+                    >
+                        LOGIN
+                    </button>
 
-    <Footer />
+                </div>
+            </div>
 
-</div>
+            <Footer />
+        </div>
     )
 }
 

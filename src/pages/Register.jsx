@@ -3,12 +3,9 @@ import Footer from "../components/Footer"
 import { Link, useNavigate } from "react-router-dom"
 import { useTokens } from "../stores/tokenStore"
 import { useState } from "react"
-import axios from "axios"
 import toast from "react-hot-toast"
 import { useDarkmode } from "../stores/store"
 import api from "../utils/axios"
-
-
 
 const Register = () => {
   const { isDarkmodeEnabled } = useDarkmode()
@@ -44,84 +41,123 @@ const Register = () => {
     }
   }
 
-  const inputClass = `w-80 p-3 rounded-xl border border-pink-200 shadow-sm
-    focus:outline-none focus:ring-2 focus:ring-pink-400 transition
-    ${isDarkmodeEnabled
-      ? "bg-[#232536] placeholder:text-zinc-400 text-white"
-      : "bg-white placeholder:text-zinc-500 text-black"
-    }`
-
   return (
-    <div className={`w-full min-h-screen ${isDarkmodeEnabled ? "bg-[#181A2A]" : "bg-pink-50"} transition-all`}>
+    <div className={`w-full min-h-screen transition-all
+    ${isDarkmodeEnabled
+        ? "bg-[#1c1814] text-[#e6dccf]"
+        : "bg-[#f4efe7] text-[#3a3835]"
+      }`}>
+
       <NavbarLr />
 
-      <div className="my-20 flex justify-center items-center flex-col space-y-4">
+      <div className="flex justify-center items-center my-20 px-4">
 
-        <h1 className="text-4xl font-extrabold mb-6 bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 bg-clip-text text-transparent">
-          Register
-        </h1>
+        <div className={`w-full max-w-md p-10 rounded-2xl shadow-sm
+        ${isDarkmodeEnabled ? "bg-[#26221d]" : "bg-white"}`}>
 
-        <input
-          value={formData.firstName}
-          onChange={e => handleInputChange("firstName", e.target.value)}
-          className={inputClass}
-          placeholder="First Name"
-          type="text"
-        />
-        <input
-          value={formData.lastName}
-          onChange={e => handleInputChange("lastName", e.target.value)}
-          className={inputClass}
-          placeholder="Last Name"
-          type="text"
-        />
-        <input
-          value={formData.address}
-          onChange={e => handleInputChange("address", e.target.value)}
-          className={inputClass}
-          placeholder="Address"
-          type="text"
-        />
-        <input
-          value={formData.phoneNumber}
-          onChange={e => handleInputChange("phoneNumber", e.target.value)}
-          className={inputClass}
-          placeholder="Phone Number"
-          type="tel"
-        />
-        <input
-          value={formData.email}
-          onChange={e => handleInputChange("email", e.target.value)}
-          className={inputClass}
-          placeholder="Email"
-          type="email"
-        />
-        <input
-          value={formData.password}
-          onChange={e => handleInputChange("password", e.target.value)}
-          className={inputClass}
-          placeholder="Password"
-          type="password"
-        />
-        <input
-          value={formData.confirmedPassword}
-          onChange={e => handleInputChange("confirmedPassword", e.target.value)}
-          className={inputClass}
-          placeholder="Confirm Password"
-          type="password"
-        />
+          <h1 className="text-2xl text-center mb-8 tracking-[3px]">
+            REGISTER
+          </h1>
 
-        <Link to="/login" className="text-sm text-pink-500 underline hover:text-pink-600 transition">
-          Already have an account?
-        </Link>
+          <div className="space-y-3">
 
-        <button
-          onClick={handleRegister}
-          className="w-80 h-12 rounded-xl bg-gradient-to-r from-pink-400 to-pink-600 text-white font-bold hover:scale-105 transition"
-        >
-          Register
-        </button>
+            <input
+              value={formData.firstName}
+              onChange={e => handleInputChange("firstName", e.target.value)}
+              className={`w-full p-3 border rounded-lg text-sm
+              ${isDarkmodeEnabled
+                  ? "bg-[#1c1814] border-[#3a342c] text-white placeholder:text-[#a8a093]"
+                  : "bg-[#f9f6f1] border-[#ddd] text-black placeholder:text-gray-500"
+                }`}
+              placeholder="First Name"
+            />
 
+            <input
+              value={formData.lastName}
+              onChange={e => handleInputChange("lastName", e.target.value)}
+              className={`w-full p-3 border rounded-lg text-sm
+              ${isDarkmodeEnabled
+                  ? "bg-[#1c1814] border-[#3a342c] text-white placeholder:text-[#a8a093]"
+                  : "bg-[#f9f6f1] border-[#ddd] text-black placeholder:text-gray-500"
+                }`}
+              placeholder="Last Name"
+            />
+
+            <input
+              value={formData.address}
+              onChange={e => handleInputChange("address", e.target.value)}
+              className={`w-full p-3 border rounded-lg text-sm
+              ${isDarkmodeEnabled
+                  ? "bg-[#1c1814] border-[#3a342c] text-white placeholder:text-[#a8a093]"
+                  : "bg-[#f9f6f1] border-[#ddd] text-black placeholder:text-gray-500"
+                }`}
+              placeholder="Address"
+            />
+
+            <input
+              value={formData.phoneNumber}
+              onChange={e => handleInputChange("phoneNumber", e.target.value)}
+              className={`w-full p-3 border rounded-lg text-sm
+              ${isDarkmodeEnabled
+                  ? "bg-[#1c1814] border-[#3a342c] text-white placeholder:text-[#a8a093]"
+                  : "bg-[#f9f6f1] border-[#ddd] text-black placeholder:text-gray-500"
+                }`}
+              placeholder="Phone Number"
+            />
+
+            <input
+              value={formData.email}
+              onChange={e => handleInputChange("email", e.target.value)}
+              className={`w-full p-3 border rounded-lg text-sm
+              ${isDarkmodeEnabled
+                  ? "bg-[#1c1814] border-[#3a342c] text-white placeholder:text-[#a8a093]"
+                  : "bg-[#f9f6f1] border-[#ddd] text-black placeholder:text-gray-500"
+                }`}
+              placeholder="Email"
+              type="email"
+            />
+
+            <input
+              value={formData.password}
+              onChange={e => handleInputChange("password", e.target.value)}
+              className={`w-full p-3 border rounded-lg text-sm
+              ${isDarkmodeEnabled
+                  ? "bg-[#1c1814] border-[#3a342c] text-white placeholder:text-[#a8a093]"
+                  : "bg-[#f9f6f1] border-[#ddd] text-black placeholder:text-gray-500"
+                }`}
+              placeholder="Password"
+              type="password"
+            />
+
+            <input
+              value={formData.confirmedPassword}
+              onChange={e => handleInputChange("confirmedPassword", e.target.value)}
+              className={`w-full p-3 border rounded-lg text-sm
+              ${isDarkmodeEnabled
+                  ? "bg-[#1c1814] border-[#3a342c] text-white placeholder:text-[#a8a093]"
+                  : "bg-[#f9f6f1] border-[#ddd] text-black placeholder:text-gray-500"
+                }`}
+              placeholder="Confirm Password"
+              type="password"
+            />
+
+          </div>
+
+          <Link to="/login">
+            <p className="text-xs mt-5 mb-6 opacity-70 hover:opacity-100 cursor-pointer">
+              Already have an account?
+            </p>
+          </Link>
+
+          <button
+            onClick={handleRegister}
+            className="w-full border py-3 text-sm tracking-wide transition
+            hover:bg-black hover:text-white"
+          >
+            REGISTER
+          </button>
+
+        </div>
       </div>
 
       <Footer />

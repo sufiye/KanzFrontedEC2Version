@@ -4,14 +4,13 @@ import { useNavigate } from "react-router-dom";
 import api from "../utils/axios";
 import { useTokens } from "../stores/tokenStore";
 
-
 const API_URL = "http://localhost:5064/api";
 
 const CartCard = ({ product }) => {
   const [image, setImage] = useState("/no-image.png");
+  const [added, setAdded] = useState(false); // ✨ animation state
   const { isDarkmodeEnabled } = useDarkmode();
   const navigate = useNavigate();
-
   const { accessToken } = useTokens();
 
   async function imageGet(id) {
@@ -31,34 +30,34 @@ const CartCard = ({ product }) => {
     navigate(`/details/${product.id}`);
   };
 
+  const addToBasket = async (e) => {
+    e.stopPropagation();
 
- const addToBasket = async (e) => {
-  e.stopPropagation();
+    if (!accessToken) {
+      navigate("/login");
+      return;
+    }
 
-  if (!accessToken) {
-    alert("You must be logged in to add items to basket");
-    return;
-  }
+    try {
+      const res = await api.post(
+        "/BasketItem",
+        { productId: product.id, quantity: 1 },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
 
-  try {
-    const res = await api.post(
-      "/BasketItem",
-      { productId: product.id, quantity: 1 },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
+      console.log(res.data);
 
-    console.log(res.data);
-    alert("Product added to basket 🛒");
-  } catch (error) {
-    console.error(error);
-    alert("Failed to add product to basket");
-  }
-};
+      setAdded(true);
+      setTimeout(() => setAdded(false), 1500);
 
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     if (product?.attachments?.length > 0) {
@@ -69,50 +68,51 @@ const CartCard = ({ product }) => {
   return (
     <div
       onClick={goToDetails}
-      className={`relative w-[300px] p-3 border rounded-2xl space-y-2 shadow-sm flex flex-col
-      ${isDarkmodeEnabled ? "border-pink-500" : "border-pink-300"}
-      overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg`}
+      className={`relative p-3 rounded-xl flex flex-col gap-2 cursor-pointer border 
+      transition-all duration-300 hover:scale-[1.03]
+      ${
+        isDarkmodeEnabled
+          ? "bg-[#1f1b16]"
+          : "bg-[#f4efe7]"
+      }`}
     >
 
       <img
-        className="w-full h-[200px] object-cover rounded-xl"
+        className="w-full h-[200px] object-cover rounded-lg"
         src={image}
         alt={product?.originalFileName}
       />
 
-      <h1
-        className={`text-xl font-medium line-clamp-2 ${isDarkmodeEnabled ? "text-white" : "text-black"
-          }`}
-      >
+      <h1 className="text-sm tracking-wide line-clamp-2">
         {product?.name}
       </h1>
 
-      <p
-        className={`text-sm ${isDarkmodeEnabled ? "text-zinc-300" : "text-zinc-700"
-          }`}
-      >
-        {product?.description}
+      <p className="text-sm opacity-70">
+        {product?.price?.toFixed(2)} azn
       </p>
 
-      <div className="flex justify-between items-center mt-2">
-        <p
-          className={`text-lg font-semibold ${isDarkmodeEnabled ? "text-white" : "text-black"
-            }`}
-        >
-          {product?.price?.toFixed(2)} azn
-        </p>
-        <button
-          onClick={addToBasket}
-          className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 shadow-sm
-           ${isDarkmodeEnabled
-              ? "bg-gray-800 text-white hover:bg-pink-700 hover:shadow-md"
-              : "bg-white text-gray-900 hover:bg-pink-700 hover:text-white hover:shadow-md"}`
-          }
-        >
-          Add to Basket
-        </button>
+      <button
+        onClick={addToBasket}
+        className={`relative overflow-hidden border text-xs tracking-wide py-2 mt-2 transition-all duration-300
+        ${
+          isDarkmodeEnabled
+            ? "border-[#c2b6a3] text-[#e7dccf]"
+            : "border-[#3a3835] text-[#3a3835]"
+        }
+        ${!added && "hover:bg-black hover:text-white"}
+        `}
+      >
+        <span className={`transition ${added ? "opacity-0" : "opacity-100"}`}>
+          ADD TO CART
+        </span>
 
-      </div>
+        <span
+          className={`absolute inset-0 flex items-center justify-center transition
+          ${added ? "opacity-100 scale-100" : "opacity-0 scale-75"}`}
+        >
+          ✓ ADDED
+        </span>
+      </button>
     </div>
   );
 };

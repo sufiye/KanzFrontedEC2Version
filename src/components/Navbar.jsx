@@ -1,147 +1,76 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useDarkmode } from "../stores/store"
 import { useTokens } from "../stores/tokenStore"
-import { useNavigate } from "react-router-dom"
 
 const Navbar = ({ searchterm, setSearchterm }) => {
-
   const { toggleDarkmode, isDarkmodeEnabled } = useDarkmode()
   const { accessToken, clearTokens } = useTokens()
   const navigate = useNavigate()
 
-  const handleLogout = () => {
-    clearTokens()
-    navigate("/login")
-  }
-
   return (
     <div
-      className={`pt-5 pb-5 flex items-center justify-center gap-40 transition-all
-      ${isDarkmodeEnabled
-          ? "bg-[#181A2A]"
-          : "bg-gradient-to-r from-pink-50 via-white to-pink-50"
-        }`}
+      className={`w-full flex justify-between items-center px-12 py-6 text-sm transition
+      ${
+        isDarkmodeEnabled
+          ? "bg-[#1c1814] text-[#e6dccf]"
+          : "bg-[#f4efe7] text-[#3a3835]"
+      }`}
     >
 
-      {/* Logo */}
-      <div className="flex items-center gap-2">
-        <h1
-          className={`text-3xl font-extrabold tracking-widest bg-gradient-to-r
-          ${isDarkmodeEnabled
-              ? "from-pink-300 to-pink-500"
-              : "from-pink-600 to-pink-800"}
-          bg-clip-text text-transparent drop-shadow-lg`}
-        >
-          Kanz
-        </h1>
-      </div>
+      <h1 className="text-xl tracking-[3px] font-semibold">
+        Kanz
+      </h1>
 
-      <div className="flex items-center gap-20">
+      <div className="flex items-center gap-10 tracking-wide">
 
-        {/* Navigation */}
-        <div
-          className={`flex items-center gap-10 text-lg font-semibold
-          ${isDarkmodeEnabled ? "text-gray-200" : "text-gray-700"}`}
-        >
+        <Link className="hover:opacity-60 transition" to="/">Home</Link>
+        <Link className="hover:opacity-60 transition" to="/BasketItems">Basket</Link>
+        <Link className="hover:opacity-60 transition" to="/orders">Order</Link>
 
-          <Link to={"/"} className="group relative">
-            <span className="cursor-pointer transition group-hover:text-pink-500">
-              Home
-            </span>
-            <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-pink-500 transition-all duration-300 group-hover:w-full"></span>
-          </Link>
-
-          <Link to={"/BasketItems"} className="group relative">
-            <span className="cursor-pointer transition group-hover:text-pink-500">
-              Basket
-            </span>
-            <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-pink-500 transition-all duration-300 group-hover:w-full"></span>
-          </Link>
-
-          <Link to={"/orders"} className="group relative">
-            <span className="cursor-pointer transition group-hover:text-pink-500">
-              Order
-            </span>
-            <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-pink-500 transition-all duration-300 group-hover:w-full"></span>
-          </Link>
-
-          <a href="#contact" className="group relative">
-            <span className="cursor-pointer transition group-hover:text-pink-500">
-              Contact
-            </span>
-            <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-pink-500 transition-all duration-300 group-hover:w-full"></span>
-          </a>
-
-        </div>
-
-        {/* Right Side */}
-        <div className="flex items-center gap-5">
-
-          {/* Search */}
-          <div className="relative">
-            <input
-              className={`rounded-xl w-[180px] pl-4 pr-10 p-2 border border-pink-200
-              focus:outline-none focus:ring-2 focus:ring-pink-400 transition
-              ${isDarkmodeEnabled
-                  ? "bg-[#242535] placeholder:text-zinc-400 text-white"
-                  : "bg-white text-black"
-                }`}
-              placeholder="Search"
+        <input
+           placeholder="Search"
               type="search"
               value={searchterm}
               onChange={(e) => setSearchterm(e.target.value)}
-            />
-            <img
-              className="absolute right-3 top-2.5 w-4 opacity-60"
-              src="../src/assets/search.png"
-            />
-          </div>
-
-          {/* Darkmode toggle */}
-          <button
-            className="w-12 h-7 flex items-center bg-pink-200 rounded-full p-1 cursor-pointer"
-            onClick={toggleDarkmode}
-          >
-            <div
-              className={`bg-white w-5 h-5 rounded-full shadow-md transform duration-300 flex items-center justify-center
-              ${isDarkmodeEnabled ? "translate-x-5" : ""}`}
-            >
-              {isDarkmodeEnabled ?
-                <img src="src/assets/moon.png" className="w-3" /> :
-                <img src="src/assets/sun.png" className="w-3" />}
-            </div>
-          </button>
-
-          {/* Sign in */}
-          {accessToken ? (
-
-            <button
-              onClick={handleLogout}
-              className="h-[38px] px-5 rounded-xl bg-gradient-to-r
-    from-gray-500 to-gray-700 text-white font-semibold
-    shadow-md hover:scale-105 transition"
-            >
-              Logout
-            </button>
-
-          ) : (
-
-            <Link to={"/login"}>
-              <button
-                className="h-[38px] px-5 rounded-xl bg-gradient-to-r
-      from-pink-400 to-pink-600 text-white font-semibold
-      shadow-md hover:scale-105 hover:shadow-pink-300 transition"
-              >
-                Sign In
-              </button>
-            </Link>
-
-          )}
-
-        </div>
+          className={`ml-6 px-4 py-2 text-xs rounded-lg border transition
+          focus:outline-none
+          ${
+            isDarkmodeEnabled
+              ? "bg-[#26221d] border-[#3a342c] text-white placeholder:text-[#a8a093]"
+              : "bg-white border-[#ddd] text-black placeholder:text-gray-500"
+          }`}
+        />
 
       </div>
 
+      <div className="flex items-center gap-5">
+
+        <button
+          onClick={toggleDarkmode}
+          className="opacity-70 hover:opacity-100 transition"
+        >
+          {isDarkmodeEnabled ? "☀️" : "🌙"}
+        </button>
+
+        {accessToken ? (
+          <button
+            onClick={() => {
+              clearTokens()
+              navigate("/login") 
+            }}
+            className="border px-5 py-2 text-xs tracking-wide hover:bg-black hover:text-white transition"
+          >
+            LOGOUT
+          </button>
+        ) : (
+          <Link to="/login">
+            <button className="border px-5 py-2 text-xs tracking-wide hover:bg-black hover:text-white transition">
+              SIGN IN
+            </button>
+          </Link>
+        )}
+
+      </div>
     </div>
   )
 }

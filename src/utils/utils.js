@@ -3,8 +3,13 @@ import { useTokens } from "../stores/tokenStore";
 
 export const refreshTokens = async () => {
   try {
-    const { refreshToken, setAccessToken, setRefreshToken, clearTokens } =
-      useTokens.getState();
+    const {
+      refreshToken,
+      setAccessToken,
+      setRefreshToken,
+      setRoles,
+      clearTokens,
+    } = useTokens.getState();
 
     if (!refreshToken) {
       throw new Error("No refresh token found");
@@ -13,34 +18,47 @@ export const refreshTokens = async () => {
     const response = await axios.post(
       "http://localhost:5064/api/Auth/refreshToken",
       {
-        refreshToken: refreshToken, // ⚠️ backend bunu gözləyir
-      },
-      {
-        headers: { "Content-Type": "application/json" },
+        refreshToken: refreshToken,
       }
     );
 
     const data = response.data;
 
-    // ✅ həm access həm refresh set et
+    // ✅ yoxlama
     if (response.status === 200 && data.accessToken) {
+      // 🔥 access token
       setAccessToken(data.accessToken);
 
-      // bəzi backendlər yeni refreshToken də qaytarır
+      // 🔥 refresh token (əgər yenisi gəlirsə)
       if (data.refreshToken) {
         setRefreshToken(data.refreshToken);
       }
 
-      return data.accessToken;
+      // 🔥 ROLES (ƏN VACİB)
+      if (data.roles) {
+        // arraydirsə olduğu kimi
+        // stringdirsə array-ə çevir
+        const rolesArray = Array.isArray(data.roles)
+          ? data.roles
+          : [data.roles];
+
+        setRoles(rolesArray);
+      }
+
+      // 🔥 interceptor üçün object qaytar
+      return {
+        accessToken: data.accessToken,
+        roles: data.roles || [],
+      };
     } else {
       throw new Error("Invalid refresh response");
     }
   } catch (error) {
     console.error("❌ Refresh token error:", error);
 
-    // ❗ hər şey fail olsa → logout
-    useTokens.getState().clearTokens();
+    // ❗ logout
+    clearTokens();
 
     throw error;
   }
-};
+}; 

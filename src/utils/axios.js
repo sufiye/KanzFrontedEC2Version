@@ -37,7 +37,6 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-// 🔹 RESPONSE
 api.interceptors.response.use(
   (response) => {
     const { setLoading } = useTokens.getState();

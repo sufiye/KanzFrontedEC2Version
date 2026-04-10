@@ -24,20 +24,14 @@ export const refreshTokens = async () => {
 
     const data = response.data;
 
-    // ✅ yoxlama
     if (response.status === 200 && data.accessToken) {
-      // 🔥 access token
       setAccessToken(data.accessToken);
 
-      // 🔥 refresh token (əgər yenisi gəlirsə)
       if (data.refreshToken) {
         setRefreshToken(data.refreshToken);
       }
 
-      // 🔥 ROLES (ƏN VACİB)
       if (data.roles) {
-        // arraydirsə olduğu kimi
-        // stringdirsə array-ə çevir
         const rolesArray = Array.isArray(data.roles)
           ? data.roles
           : [data.roles];
@@ -45,7 +39,6 @@ export const refreshTokens = async () => {
         setRoles(rolesArray);
       }
 
-      // 🔥 interceptor üçün object qaytar
       return {
         accessToken: data.accessToken,
         roles: data.roles || [],
@@ -56,7 +49,6 @@ export const refreshTokens = async () => {
   } catch (error) {
     console.error("❌ Refresh token error:", error);
 
-    // ❗ logout
     clearTokens();
 
     throw error;

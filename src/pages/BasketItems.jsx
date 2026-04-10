@@ -5,27 +5,34 @@ import { useDarkmode } from "../stores/store";
 import { useTokens } from "../stores/tokenStore";
 import api from "../utils/axios";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const API_URL = "http://localhost:5064/api";
 
 const BasketItems = () => {
   const { isDarkmodeEnabled } = useDarkmode();
   const { accessToken } = useTokens();
-  const [basketItems, setBasketItems] = useState([]);
+  const navigate = useNavigate();
 
+  const [basketItems, setBasketItems] = useState([]);
+  const [loading, setLoading] = useState(false); // 🔥 loading state
+
+  // 🔹 IMAGE FETCH
   const fetchImage = async (attachmentId) => {
     try {
       const res = await fetch(`${API_URL}/Attachment/${attachmentId}/download`);
-      if (!res.ok) throw new Error("Failed to fetch image");
+      if (!res.ok) throw new Error();
       const blob = await res.blob();
       return URL.createObjectURL(blob);
-    } catch (error) {
+    } catch {
       return "/no-image.png";
     }
   };
 
+  // 🔹 GET BASKET
   const getBasketItems = async () => {
     if (!accessToken) return;
+
     try {
       const { data } = await api.get("/BasketItem", {
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -36,36 +43,67 @@ const BasketItems = () => {
           const imageUrl = item.product?.attachments?.length
             ? await fetchImage(item.product.attachments[0].id)
             : "/no-image.png";
+
           return { ...item, imageUrl };
         })
       );
 
       setBasketItems(itemsWithImages);
-    } catch (error) {
-      toast.error("Failed to load basket items");
+    } catch {
+      toast.error("Failed to load basket");
     }
   };
 
+  // 🔹 REMOVE ITEM
   const removeFromBasket = async (id) => {
     if (!accessToken) return;
+
     try {
       await api.delete(`/BasketItem/${id}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
+
       setBasketItems(prev => prev.filter(item => item.id !== id));
       toast.success("Item removed");
     } catch {
-      toast.error("Failed to remove item");
+      toast.error("Failed to remove");
     }
   };
 
+  // 🔹 TOTAL
   const totalPrice = basketItems.reduce(
-    (sum, item) => sum + (item.product?.price || 0) * (item.quantity || 1),
+    (sum, item) =>
+      sum + (item.product?.price || 0) * (item.quantity || 1),
     0
   );
 
-  const makeOrder = () => {
-    toast.success(`Order placed! Total: ${totalPrice.toFixed(2)} AZN`);
+  // 🔥 MAKE ORDER (ƏSAS HİSSƏ)
+  const makeOrder = async () => {
+    if (!accessToken || loading) return;
+
+    setLoading(true);
+
+    try {
+      await api.post("/Order", {}, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      });
+
+      toast.success("Order placed successfully ✅");
+
+      setBasketItems([]); // 🔥 basket clear
+
+      setTimeout(() => {
+        navigate("/orders"); // 🔥 redirect
+      }, 800);
+
+    } catch (error) {
+      console.error("ORDER ERROR:", error);
+      toast.error("Failed to place order ❌");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -93,6 +131,7 @@ const BasketItems = () => {
         ) : (
           <div className="grid lg:grid-cols-3 gap-10">
 
+            {/* 🔹 ITEMS */}
             <div className="lg:col-span-2 space-y-6">
 
               {basketItems.map((item) => (
@@ -143,6 +182,7 @@ const BasketItems = () => {
 
             </div>
 
+            {/* 🔹 SUMMARY */}
             <div
               className={`h-fit p-6 rounded-xl border
               ${isDarkmodeEnabled
@@ -162,10 +202,14 @@ const BasketItems = () => {
 
               <button
                 onClick={makeOrder}
-                className="w-full border py-3 text-sm tracking-wide transition
-                hover:bg-black hover:text-white"
+                disabled={loading}
+                className={`w-full border py-3 text-sm tracking-wide transition
+                ${loading 
+                  ? "opacity-50 cursor-not-allowed" 
+                  : "hover:bg-black hover:text-white"
+                }`}
               >
-                PLACE ORDER
+                {loading ? "Processing..." : "PLACE ORDER"}
               </button>
 
             </div>

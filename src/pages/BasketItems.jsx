@@ -15,9 +15,8 @@ const BasketItems = () => {
   const navigate = useNavigate();
 
   const [basketItems, setBasketItems] = useState([]);
-  const [loading, setLoading] = useState(false); // 🔥 loading state
+  const [loading, setLoading] = useState(false);
 
-  // 🔹 IMAGE FETCH
   const fetchImage = async (attachmentId) => {
     try {
       const res = await fetch(`${API_URL}/Attachment/${attachmentId}/download`);
@@ -29,7 +28,6 @@ const BasketItems = () => {
     }
   };
 
-  // 🔹 GET BASKET
   const getBasketItems = async () => {
     if (!accessToken) return;
 
@@ -54,7 +52,6 @@ const BasketItems = () => {
     }
   };
 
-  // 🔹 REMOVE ITEM
   const removeFromBasket = async (id) => {
     if (!accessToken) return;
 
@@ -70,14 +67,12 @@ const BasketItems = () => {
     }
   };
 
-  // 🔹 TOTAL
   const totalPrice = basketItems.reduce(
     (sum, item) =>
       sum + (item.product?.price || 0) * (item.quantity || 1),
     0
   );
 
-  // 🔥 MAKE ORDER (ƏSAS HİSSƏ)
   const makeOrder = async () => {
     if (!accessToken || loading) return;
 
@@ -92,10 +87,10 @@ const BasketItems = () => {
 
       toast.success("Order placed successfully ✅");
 
-      setBasketItems([]); // 🔥 basket clear
+      setBasketItems([]);
 
       setTimeout(() => {
-        navigate("/orders"); // 🔥 redirect
+        navigate("/orders"); 
       }, 800);
 
     } catch (error) {
@@ -131,7 +126,6 @@ const BasketItems = () => {
         ) : (
           <div className="grid lg:grid-cols-3 gap-10">
 
-            {/* 🔹 ITEMS */}
             <div className="lg:col-span-2 space-y-6">
 
               {basketItems.map((item) => (
@@ -182,7 +176,6 @@ const BasketItems = () => {
 
             </div>
 
-            {/* 🔹 SUMMARY */}
             <div
               className={`h-fit p-6 rounded-xl border
               ${isDarkmodeEnabled

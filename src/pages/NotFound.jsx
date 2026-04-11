@@ -1,30 +1,54 @@
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useDarkmode } from '../stores/store'
+import { useEffect } from "react"
+import { useNavigate } from "react-router-dom"
+import { useDarkmode } from "../stores/store"
+
 const NotFound = () => {
   const { isDarkmodeEnabled } = useDarkmode()
+  const navigate = useNavigate()
 
-    const navigate = useNavigate();
-    useEffect(()=>{
-        const timer = setTimeout(()=>{
-            navigate("/")
-        },3000)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate("/")
+    }, 3000)
 
-        return ()=>clearTimeout(timer);
-    },[])
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
-    <div  className={`w-full h-screen flex  gap-10 justify-center items-center ${isDarkmodeEnabled ?"bg-[#181A2A]":"bg-white"}`}>
-      <div className='grid grid-cols-1'>
+    <div
+      className={`w-full h-screen flex flex-col justify-center items-center text-center px-5
+      ${isDarkmodeEnabled
+        ? "bg-[#1c1814] text-[#e6dccf]"
+        : "bg-[#f4efe7] text-[#3a3835]"
+      }`}
+    >
 
-      <div className='grid grid-cols-2 gap-5'>
-      <div className='border-2 h-50 w-50 rounded-full flex justify-center  bg-white'><div className='border h-20 w-20 rounded-full mt-2 bg-black'></div></div>
-      <div className='border-2 h-50 w-50 rounded-full flex justify-center bg-white'><div className='border h-20 w-20 rounded-full mt-2 bg-black'></div></div>
-      </div>
+      <h1 className="text-[120px] md:text-[160px] font-bold tracking-[10px] opacity-80">
+        404
+      </h1>
 
-      <div className='w-100 border-2 h-10 rounded-2xl mt-5 bg-white'></div>
-      </div>
-       <h2 className={`text-9xl  font-bold ${isDarkmodeEnabled?"text-white":"text-black"}`}> Not Found</h2>
-        </div>
+      <p className="text-sm tracking-[4px] mb-4">
+        PAGE NOT FOUND
+      </p>
+
+      <p className="text-xs opacity-70 mb-8 max-w-md">
+        The page you are looking for doesn’t exist or has been moved.
+      </p>
+
+      <button
+        onClick={() => navigate("/")}
+        className="border px-6 py-2 text-xs tracking-wide
+        transition-all duration-300
+        hover:bg-black hover:text-white active:scale-95"
+      >
+        BACK TO HOME
+      </button>
+
+      <p className="text-[10px] opacity-50 mt-6">
+        Redirecting in 3 seconds...
+      </p>
+
+    </div>
   )
 }
 

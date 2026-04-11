@@ -4,16 +4,21 @@ import { useState, useEffect } from "react"
 import api from "../utils/axios"
 import { useDarkmode } from "../stores/store"
 import { useNavigate } from "react-router-dom"
+import { useTokens } from "../stores/tokenStore"
 
 const API_URL = "http://localhost:5064/api"
 
 const Order = () => {
   const { isDarkmodeEnabled } = useDarkmode()
+  const { roles } = useTokens()
+  const isAdmin = roles?.includes("Admin")
+
   const [orders, setOrders] = useState([])
   const [products, setProducts] = useState({})
+  const [users, setUsers] = useState({}) 
+
   const navigate = useNavigate()
 
-  // 🔹 PRODUCT FETCH
   const getProductById = async (id) => {
     try {
       if (products[id]) return
@@ -30,28 +35,65 @@ const Order = () => {
     }
   }
 
-  // 🔹 GET ORDERS
+  const getUserById = async (userId) => {
+    try {
+      if (users[userId]) return
+
+      const res = await api.post(`/Auth/${userId}/user`)
+
+      setUsers(prev => ({
+        ...prev,
+        [userId]: res.data
+      }))
+
+    } catch (err) {
+      console.error("USER ERROR:", err)
+    }
+  }
+
   const getOrders = async () => {
     try {
-      const res = await api.get("/Order")
+      const url = isAdmin ? "/Order/All" : "/Order"
+
+      const res = await api.get(url)
       const data = res.data
-console.log(data);
 
       const orderList = Array.isArray(data) ? data : [data]
-
       setOrders(orderList)
 
-      // 🔥 product preload
       orderList.forEach(order => {
+
         order.items?.forEach(item => {
           getProductById(item.productId)
         })
+
+        if (order.userId) {
+          getUserById(order.userId)
+        }
+
       })
 
     } catch (error) {
       console.error("ORDER ERROR:", error)
     }
   }
+
+const updateStatus = async (orderId, status) => {
+  try {
+    await api.put(`/Order/${orderId}`, {
+      status: status   
+    })
+
+    setOrders(prev =>
+      prev.map(o =>
+        o.id === orderId ? { ...o, status } : o
+      )
+    )
+
+  } catch (err) {
+    console.error("STATUS ERROR:", err.response?.data || err)
+  }
+}
 
   useEffect(() => {
     const token = localStorage.getItem("tokens")
@@ -62,7 +104,7 @@ console.log(data);
     }
 
     getOrders()
-  }, [])
+  }, [isAdmin])
 
   return (
     <div className={`min-h-screen w-full ${
@@ -70,97 +112,121 @@ console.log(data);
         ? "bg-[#1c1814] text-[#e6dccf]" 
         : "bg-[#f4efe7] text-[#3a3835]"
     }`}>
-      
+
       <Navbar />
 
       <div className="max-w-5xl mx-auto py-10 px-5">
 
         <h1 className="text-2xl font-semibold mb-6 tracking-wide">
-          My Orders ({orders.length})
+          {isAdmin ? "All Orders" : "My Orders"} ({orders.length})
         </h1>
 
         {orders.length === 0 ? (
-          <p className="opacity-70">No orders found</p>
+          <p>No orders found</p>
         ) : (
           <div className="space-y-6">
 
-            {orders.map((order) => (
-              <div 
-                key={order.id}
-                className={`p-5 rounded-xl border shadow-sm hover:shadow-lg transition
-                ${isDarkmodeEnabled 
-                  ? "bg-[#26221d] border-[#3a342c]" 
-                  : "bg-white border-[#e5e0d8]"}`}
-              >
+            {orders.map((order) => {
 
-                {/* 🔹 HEADER */}
-                <div className="flex justify-between mb-3">
-                  <span className="text-sm opacity-70">
-                    Order ID: {order.id}
-                  </span>
+              const user = users[order.userId]
 
-                  <span className={`text-xs px-3 py-1 rounded-full
-                    ${order.status === "Pending" 
-                      ? "bg-[#3a342c] text-[#e6dccf]" 
-                      : "bg-green-500 text-white"}`}>
-                    {order.status}
-                  </span>
-                </div>
+              return (
+                <div key={order.id}
+                  className={`p-5 rounded-xl border shadow-sm
+                  ${isDarkmodeEnabled 
+                    ? "bg-[#26221d] border-[#3a342c]" 
+                    : "bg-white border-[#e5e0d8]"}`}>
 
-                <p className="text-sm opacity-80">
-                  {new Date(order.orderDate).toLocaleString()}
-                </p>
+                  {/* 🔥 USER INFO */}
+                  {isAdmin && (
+                    <div className="mb-3 text-sm space-y-1">
+                      <p><b>User:</b> {user?.firstName+ " " + user?.lastName || "Loading..."}</p>
+                      <p><b>Phone:</b> {user?.phoneNumber || "-"}</p>
+                      <p><b>Address:</b> {user?.address || "-"}</p>
+                    </div>
+                  )}
 
-                <p className="font-semibold mt-1">
-                  Total: {order.totalPrice} AZN
-                </p>
+                  {/* HEADER */}
+                  <div className="flex justify-between mb-2">
+                    <span className="text-xs opacity-70">
+                      {order.id}
+                    </span>
 
-                {/* 🔹 ITEMS */}
-                <div className="mt-4 space-y-3">
-                  {order.items?.map((item, index) => {
-                    const product = products[item.productId]
+                    <span className={`text-xs px-3 py-1 rounded-full
+                      ${
+                        order.status === "Pending"
+                          ? "bg-yellow-500 text-white"
+                          : order.status === "Shipped"
+                          ? "bg-blue-500 text-white"
+                          : "bg-green-500 text-white"
+                      }`}>
+                      {order.status}
+                    </span>
+                  </div>
 
-                    return (
-                      <div 
-                        key={index}
-                        className="flex justify-between items-center border-t pt-3 text-sm"
-                      >
+                  <p className="text-sm opacity-70">
+                    {new Date(order.orderDate).toLocaleString()}
+                  </p>
 
-                        {/* 🔥 PRODUCT */}
-                        <div className="flex items-center gap-3">
+                  <p className="font-semibold mt-1">
+                    Total: {order.totalPrice} AZN
+                  </p>
 
-                          <img
-                            src={
-                              product?.attachments?.length > 0
-                                ? `${API_URL}/Attachment/${product.attachments[0].id}/download`
-                                : "/no-image.png"
-                            }
-                            className="w-12 h-12 object-cover rounded-lg"
-                          />
+                  <div className="mt-4 space-y-3">
+                    {order.items?.map((item, i) => {
+                      const product = products[item.productId]
 
-                          <div className="flex flex-col">
-                            <span className="font-medium">
-                              {product?.name || "Loading..."}
-                            </span>
-                            <span className="text-xs opacity-60">
-                              {item.price} AZN
-                            </span>
+                      return (
+                        <div key={i}
+                          className="flex justify-between items-center border-t pt-3 text-sm">
+
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={
+                                product?.attachments?.length > 0
+                                  ? `${API_URL}/Attachment/${product.attachments[0].id}/download`
+                                  : "/no-image.png"
+                              }
+                              className="w-12 h-12 object-cover rounded-lg"
+                            />
+
+                            <div>
+                              <p className="font-medium">
+                                {product?.name || "Loading..."}
+                              </p>
+                              <p className="text-xs opacity-60">
+                                {item.price} AZN
+                              </p>
+                            </div>
                           </div>
 
+                          <span>x{item.quantity}</span>
                         </div>
+                      )
+                    })}
+                  </div>
 
-                        {/* 🔹 QTY */}
-                        <span className="text-sm font-medium">
-                          x{item.quantity}
-                        </span>
+                  {isAdmin && (
+                    <div className="flex gap-3 mt-4 items-center">
 
-                      </div>
-                    )
-                  })}
+                      <select
+                        value={order.status}
+                        onChange={(e) =>
+                          updateStatus(order.id, e.target.value)
+                        }
+                        className="border px-3 py-1 text-sm rounded"
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                      </select>
+
+                    </div>
+                  )}
+
                 </div>
-
-              </div>
-            ))}
+              )
+            })}
 
           </div>
         )}

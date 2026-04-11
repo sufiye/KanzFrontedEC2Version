@@ -15,7 +15,10 @@ const HomePage = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
 
   const [showModal, setShowModal] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+
   const [categories, setCategories] = useState([]);
+  const [newCategory, setNewCategory] = useState("");
 
   const [form, setForm] = useState({
     name: "",
@@ -31,18 +34,15 @@ const HomePage = () => {
 
   const { isDarkmodeEnabled } = useDarkmode();
 
-  // 🔥 GET PRODUCTS
-  async function getProducts() {
+  const getProducts = async () => {
     try {
       let res;
 
-      // 🔥 ƏGƏR CATEGORY SEÇİLİBSƏ
       if (selectedCategory) {
         res = await api.get(`/Product/${selectedCategory}/category`);
 
         let filtered = res.data;
 
-        // 🔍 search filter (frontenddə)
         if (searchTerm.length >= 1) {
           filtered = filtered.filter(p =>
             p.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -54,7 +54,6 @@ const HomePage = () => {
         return;
       }
 
-      // 🔥 NORMAL PAGED
       let url = `/Product/pagedResult?page=1&pageSize=10`;
 
       if (searchTerm.length >= 1) {
@@ -70,31 +69,26 @@ const HomePage = () => {
     } catch (error) {
       console.error(error);
     }
-  }
+  };
 
-  // 🔥 LOAD MORE (yalnız category seçilməyibsə işləyir)
   const loadMore = async () => {
-    if (selectedCategory) return; // ❌ category varsa disable
+    if (selectedCategory) return;
 
-    try {
-      const nextPage = page + 1;
+    const nextPage = page + 1;
 
-      let url = `/Product/pagedResult?page=${nextPage}&pageSize=10`;
+    let url = `/Product/pagedResult?page=${nextPage}&pageSize=10`;
 
-      if (searchTerm.length >= 1) {
-        url += `&search=${searchTerm}`;
-      }
+    if (searchTerm.length >= 1) {
+      url += `&search=${searchTerm}`;
+    }
 
-      const res = await api.get(url);
+    const res = await api.get(url);
 
-      setProducts(prev => [...prev, ...(res.data.items || [])]);
-      setPage(nextPage);
+    setProducts(prev => [...prev, ...(res.data.items || [])]);
+    setPage(nextPage);
 
-      if (!res.data.items || res.data.items.length < 10) {
-        setAllLoaded(true);
-      }
-    } catch (error) {
-      console.error(error);
+    if (!res.data.items || res.data.items.length < 10) {
+      setAllLoaded(true);
     }
   };
 
@@ -104,18 +98,12 @@ const HomePage = () => {
     setAllLoaded(false);
   };
 
-  // 🔹 GET CATEGORIES
-  async function getCategories() {
-    try {
-      const res = await api.get("/Category");
-      setCategories(res.data);
-    } catch (error) {
-      console.error(error);
-    }
-  }
+  const getCategories = async () => {
+    const res = await api.get("/Category");
+    setCategories(res.data);
+  };
 
-  // 🔹 ADD PRODUCT
-  async function addProduct() {
+  const addProduct = async () => {
     try {
       const formData = new FormData();
 
@@ -129,6 +117,7 @@ const HomePage = () => {
       await api.post("/Product", formData);
 
       setShowModal(false);
+
       setForm({
         name: "",
         title: "",
@@ -139,19 +128,51 @@ const HomePage = () => {
       });
 
       getProducts();
-    } catch (error) {
-      console.error(error);
-    }
-  }
 
-  async function deleteProduct(id) {
-    try {
-      await api.delete(`/Product/${id}`);
-      setProducts(prev => prev.filter(p => p.id !== id));
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error("ADD PRODUCT ERROR:", err);
     }
-  }
+  };
+
+  const deleteProduct = async (product) => {
+    try {
+      if (product.attachments && product.attachments.length > 0) {
+        await Promise.all(
+          product.attachments.map(att =>
+            api.delete(`/Attachment/${att.id}`)
+          )
+        );
+      }
+
+      await api.delete(`/Product/${product.id}`);
+
+      setProducts(prev => prev.filter(p => p.id !== product.id));
+
+    } catch (err) {
+      console.error("DELETE ERROR:", err);
+    }
+  };
+
+  const addCategory = async () => {
+    try {
+      await api.post("/Category", { name: newCategory });
+
+      setNewCategory("");
+      getCategories();
+
+    } catch (err) {
+      console.error("ADD CATEGORY ERROR:", err);
+    }
+  };
+
+  const deleteCategory = async (id) => {
+    try {
+      await api.delete(`/Category/${id}`);
+      setCategories(prev => prev.filter(c => c.id !== id));
+    } catch (err) {
+      console.error("DELETE CATEGORY ERROR:", err);
+    }
+  };
 
   useEffect(() => {
     getProducts();
@@ -162,11 +183,10 @@ const HomePage = () => {
   }, []);
 
   return (
-    <div className={`min-h-screen ${
-      isDarkmodeEnabled
-        ? "bg-[#1c1814] text-[#e6dccf]"
-        : "bg-[#f4efe7] text-[#3a3835]"
-    }`}>
+    <div className={`min-h-screen ${isDarkmodeEnabled
+      ? "bg-[#1c1814] text-[#e6dccf]"
+      : "bg-[#f4efe7] text-[#3a3835]"
+      }`}>
 
       <Navbar
         searchterm={searchTerm}
@@ -175,41 +195,36 @@ const HomePage = () => {
         setSelectedCategory={setSelectedCategory}
       />
 
-      <h2 className="text-center mt-20 mb-10 tracking-[3px] text-sm">
+      <h2 className="text-center mt-16 sm:mt-20 mb-8 sm:mb-10 tracking-[3px] text-xs sm:text-sm">
         BACK IN STOCK
       </h2>
 
-      {/* 🔥 CLEAR FILTER */}
-      {selectedCategory && (
-        <div className="text-center mb-6">
-          <button
-            onClick={() => setSelectedCategory("")}
-            className="border px-6 py-2 text-xs hover:bg-black hover:text-white"
-          >
-            CLEAR CATEGORY
-          </button>
-        </div>
-      )}
-
       {isAdmin && (
-        <div className="flex justify-center mb-6">
+        <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-6 px-4">
           <button
             onClick={() => setShowModal(true)}
-            className="border px-6 py-2 text-xs hover:bg-black hover:text-white"
+            className="border px-4 sm:px-6 py-2 text-xs hover:bg-black hover:text-white"
           >
             ADD PRODUCT
           </button>
+
+          <button
+            onClick={() => setShowCategoryModal(true)}
+            className="border px-4 sm:px-6 py-2 text-xs hover:bg-black hover:text-white"
+          >
+            MANAGE CATEGORY
+          </button>
         </div>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8 px-12 max-w-7xl mx-auto">
-        {products.map((product) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto">
+        {products.map(product => (
           <div key={product.id}>
             <Card product={product} />
 
             {isAdmin && (
               <button
-                onClick={() => deleteProduct(product.id)}
+                onClick={() => deleteProduct(product)}
                 className="text-red-500 text-xs mt-2"
               >
                 DELETE
@@ -219,27 +234,143 @@ const HomePage = () => {
         ))}
       </div>
 
-      <div className="flex flex-col items-center mt-12 gap-4">
-
-        {!allLoaded && !selectedCategory && (
+      {!allLoaded && !selectedCategory && (
+        <div className="flex justify-center mt-10">
           <button
             onClick={loadMore}
-            className="border px-8 py-3 text-xs hover:bg-black hover:text-white"
+            className="border px-4 sm:px-6 py-2 text-sm tracking-wide transition-all duration-300 hover:bg-black hover:text-white active:scale-95"
           >
-            LOAD MORE
+            Load More
           </button>
-        )}
+        </div>
+      )}
 
-        {products.length > 10 && !selectedCategory && (
+      {allLoaded && products.length > 10 && (
+        <div className="flex justify-center mt-4">
           <button
             onClick={showLess}
-            className="border px-8 py-3 text-xs hover:bg-black hover:text-white"
+            className="border px-4 sm:px-6 py-2 text-sm tracking-wide transition-all duration-300 hover:bg-black hover:text-white active:scale-95"
           >
-            SHOW LESS
+            Show Less
           </button>
-        )}
+        </div>
+      )}
 
-      </div>
+      {showModal && (
+        <div className="fixed inset-0 bg-black/60 flex justify-center items-center px-4">
+          <div className="bg-white w-full max-w-[500px] p-6 rounded-2xl text-black space-y-5">
+            <h2 className="text-xl font-semibold">Add Product</h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+              <div>
+                <label className="text-xs">Name</label>
+                <input className="border p-2 rounded w-full"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="text-xs">Title</label>
+                <input className="border p-2 rounded w-full"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="text-xs">Description</label>
+                <textarea className="border p-2 rounded w-full"
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="text-xs">Category</label>
+                <select className="border p-2 rounded w-full"
+                  value={form.categoryId}
+                  onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
+                >
+                  <option value="">Select category</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs">Price (AZN)</label>
+                <input type="number" className="border p-2 rounded w-full"
+                  value={form.price}
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="text-xs">Stock Count</label>
+                <input type="number" className="border p-2 rounded w-full"
+                  value={form.stockCount}
+                  onChange={(e) => setForm({ ...form, stockCount: e.target.value })}
+                />
+              </div>
+
+            </div>
+
+            <div className="flex flex-col sm:flex-row justify-end gap-3">
+              <button onClick={() => setShowModal(false)} className="border px-4 py-2">Cancel</button>
+              <button onClick={addProduct} className="bg-black text-white px-4 py-2">Add</button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {showCategoryModal && (
+        <div className="fixed inset-0 bg-black/60 flex justify-center items-center px-4">
+          <div className="bg-white p-6 w-full max-w-[400px] rounded-2xl text-black space-y-4">
+
+            <h2 className="font-semibold">Manage Categories</h2>
+
+            <div className="flex gap-2">
+              <input
+                placeholder="New category"
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                className="border p-2 w-full"
+              />
+
+              <button onClick={addCategory} className="bg-green-500 text-white px-4">
+                Add
+              </button>
+            </div>
+
+            <div className="space-y-2 max-h-[200px] overflow-y-auto">
+              {categories.map(c => (
+                <div key={c.id} className="flex justify-between items-center border p-2 rounded">
+                  <span>{c.name}</span>
+
+                  <button
+                    onClick={() => deleteCategory(c.id)}
+                    className="text-red-500 text-sm"
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setShowCategoryModal(false)}
+              className="w-full border py-2"
+            >
+              Close
+            </button>
+
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

@@ -23,8 +23,6 @@ const Navbar = () => {
       <div className="flex items-center gap-10 tracking-wide">
 
         <Link className="hover:opacity-60 transition" to="/">Home</Link>
-        <Link className="hover:opacity-60 transition" to="/BasketItems">Basket</Link>
-        <Link className="hover:opacity-60 transition" to="/orders">Order</Link>
 
       </div>
 

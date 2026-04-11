@@ -8,23 +8,22 @@ const API_URL = "http://localhost:5064/api";
 
 const CartCard = ({ product }) => {
   const [image, setImage] = useState("/no-image.png");
-  const [added, setAdded] = useState(false); // ✨ animation state
+  const [added, setAdded] = useState(false);
+
   const { isDarkmodeEnabled } = useDarkmode();
   const navigate = useNavigate();
-  const { accessToken } = useTokens();
+  const { accessToken, roles } = useTokens();
 
-  async function imageGet(id) {
+  const isAdmin = roles?.includes("Admin"); 
+  const imageGet = async (id) => {
     try {
-      const url = `${API_URL}/Attachment/${id}/download`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Image fetch failed");
+      const res = await fetch(`${API_URL}/Attachment/${id}/download`);
       const blob = await res.blob();
-      const imageUrl = URL.createObjectURL(blob);
-      setImage(imageUrl);
+      setImage(URL.createObjectURL(blob));
     } catch (error) {
       console.error(error);
     }
-  }
+  };
 
   const goToDetails = () => {
     navigate(`/details/${product.id}`);
@@ -39,17 +38,10 @@ const CartCard = ({ product }) => {
     }
 
     try {
-      const res = await api.post(
-        "/BasketItem",
-        { productId: product.id, quantity: 1 },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      console.log(res.data);
+      await api.post("/BasketItem", {
+        productId: product.id,
+        quantity: 1,
+      });
 
       setAdded(true);
       setTimeout(() => setAdded(false), 1500);
@@ -70,17 +62,12 @@ const CartCard = ({ product }) => {
       onClick={goToDetails}
       className={`relative p-3 rounded-xl flex flex-col gap-2 cursor-pointer border 
       transition-all duration-300 hover:scale-[1.03]
-      ${
-        isDarkmodeEnabled
-          ? "bg-[#1f1b16]"
-          : "bg-[#f4efe7]"
-      }`}
+      ${isDarkmodeEnabled ? "bg-[#1f1b16]" : "bg-[#f4efe7]"}`}
     >
-
       <img
         className="w-full h-[200px] object-cover rounded-lg"
         src={image}
-        alt={product?.originalFileName}
+        alt={product?.name}
       />
 
       <h1 className="text-sm tracking-wide line-clamp-2">
@@ -88,31 +75,33 @@ const CartCard = ({ product }) => {
       </h1>
 
       <p className="text-sm opacity-70">
-        {product?.price?.toFixed(2)} azn
+        {product?.price?.toFixed(2)} AZN
       </p>
 
-      <button
-        onClick={addToBasket}
-        className={`relative overflow-hidden border text-xs tracking-wide py-2 mt-2 transition-all duration-300
-        ${
-          isDarkmodeEnabled
-            ? "border-[#c2b6a3] text-[#e7dccf]"
-            : "border-[#3a3835] text-[#3a3835]"
-        }
-        ${!added && "hover:bg-black hover:text-white"}
-        `}
-      >
-        <span className={`transition ${added ? "opacity-0" : "opacity-100"}`}>
-          ADD TO CART
-        </span>
-
-        <span
-          className={`absolute inset-0 flex items-center justify-center transition
-          ${added ? "opacity-100 scale-100" : "opacity-0 scale-75"}`}
+      {!isAdmin && (
+        <button
+          onClick={addToBasket}
+          className={`relative overflow-hidden border text-xs tracking-wide py-2 mt-2 transition-all duration-300
+          ${
+            isDarkmodeEnabled
+              ? "border-[#c2b6a3] text-[#e7dccf]"
+              : "border-[#3a3835] text-[#3a3835]"
+          }
+          ${!added && "hover:bg-black hover:text-white"}
+          `}
         >
-          ✓ ADDED
-        </span>
-      </button>
+          <span className={`transition ${added ? "opacity-0" : "opacity-100"}`}>
+            ADD TO CART
+          </span>
+
+          <span
+            className={`absolute inset-0 flex items-center justify-center transition
+            ${added ? "opacity-100 scale-100" : "opacity-0 scale-75"}`}
+          >
+            ✓ ADDED
+          </span>
+        </button>
+      )}
     </div>
   );
 };

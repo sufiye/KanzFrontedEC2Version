@@ -103,36 +103,49 @@ const HomePage = () => {
     setCategories(res.data);
   };
 
-  const addProduct = async () => {
-    try {
-      const formData = new FormData();
+const addProduct = async () => {
+  try {
 
-      formData.append("name", form.name);
-      formData.append("title", form.title);
-      formData.append("description", form.description);
-      formData.append("categoryId", form.categoryId);
-      formData.append("price", form.price);
-      formData.append("stockCount", form.stockCount);
-
-      await api.post("/Product", formData);
-
-      setShowModal(false);
-
-      setForm({
-        name: "",
-        title: "",
-        description: "",
-        categoryId: "",
-        price: 0,
-        stockCount: 0,
-      });
-
-      getProducts();
-
-    } catch (err) {
-      console.error("ADD PRODUCT ERROR:", err);
+    if (
+      !form.name.trim() ||
+      !form.title.trim() ||
+      !form.description.trim() ||
+      !form.categoryId ||
+      !form.price ||
+      !form.stockCount
+    ) {
+      alert("All fields are required!");
+      return;
     }
-  };
+
+    const formData = new FormData();
+
+    formData.append("name", form.name);
+    formData.append("title", form.title);
+    formData.append("description", form.description);
+    formData.append("categoryId", form.categoryId);
+    formData.append("price", form.price);
+    formData.append("stockCount", form.stockCount);
+
+    await api.post("/Product", formData);
+
+    setShowModal(false);
+
+    setForm({
+      name: "",
+      title: "",
+      description: "",
+      categoryId: "",
+      price: 0,
+      stockCount: 0,
+    });
+
+    getProducts();
+
+  } catch (err) {
+    console.error("ADD PRODUCT ERROR:", err);
+  }
+};
 
   const deleteProduct = async (product) => {
     try {
@@ -153,17 +166,23 @@ const HomePage = () => {
     }
   };
 
-  const addCategory = async () => {
-    try {
-      await api.post("/Category", { name: newCategory });
+const addCategory = async () => {
+  try {
 
-      setNewCategory("");
-      getCategories();
-
-    } catch (err) {
-      console.error("ADD CATEGORY ERROR:", err);
+    if (!newCategory.trim()) {
+      alert("Category name cannot be empty!");
+      return;
     }
-  };
+
+    await api.post("/Category", { name: newCategory });
+
+    setNewCategory("");
+    getCategories();
+
+  } catch (err) {
+    console.error("ADD CATEGORY ERROR:", err);
+  }
+};
 
   const deleteCategory = async (id) => {
     try {
@@ -304,6 +323,7 @@ const HomePage = () => {
                 <label className="text-xs">Price (AZN)</label>
                 <input type="number" className="border p-2 rounded w-full"
                   value={form.price}
+                  min={1}
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
                 />
               </div>
@@ -312,6 +332,7 @@ const HomePage = () => {
                 <label className="text-xs">Stock Count</label>
                 <input type="number" className="border p-2 rounded w-full"
                   value={form.stockCount}
+                  min={1}
                   onChange={(e) => setForm({ ...form, stockCount: e.target.value })}
                 />
               </div>

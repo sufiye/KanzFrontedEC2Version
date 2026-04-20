@@ -91,7 +91,7 @@ const CartCard = ({ product }) => {
           `}
         >
           <span className={`transition ${added ? "opacity-0" : "opacity-100"}`}>
-            ADD TO CART
+            ADD TO BASKET
           </span>
 
           <span

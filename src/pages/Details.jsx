@@ -187,8 +187,8 @@ const Details = () => {
 
           {isAdmin && (
             <div className="flex flex-col sm:flex-row gap-3">
-              <button onClick={()=>setShowEdit(true)} className="border px-4 py-2">Edit</button>
-              <button onClick={()=>setShowImageModal(true)} className="border px-4 py-2">Images</button>
+              <button onClick={() => setShowEdit(true)} className="border px-4 py-2">Edit</button>
+              <button onClick={() => setShowImageModal(true)} className="border px-4 py-2">Images</button>
             </div>
           )}
 
@@ -197,7 +197,7 @@ const Details = () => {
               <div className="flex gap-3 items-center">
 
                 <button
-                  onClick={()=>setQuantity(q=>q>1?q-1:1)}
+                  onClick={() => setQuantity(q => q > 1 ? q - 1 : 1)}
                   className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-black hover:text-white"
                 >
                   -
@@ -206,7 +206,7 @@ const Details = () => {
                 <span>{quantity}</span>
 
                 <button
-                  onClick={()=>setQuantity(q=>q+1)}
+                  onClick={() => setQuantity(q => q + 1)}       
                   className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-black hover:text-white"
                 >
                   +
@@ -216,9 +216,24 @@ const Details = () => {
 
               <button
                 onClick={addToBasket}
-                className="w-full sm:w-auto border px-6 py-2 hover:bg-black hover:text-white"
+                className={`relative overflow-hidden border text-sm tracking-wide px-3 py-2 mt-2 transition-all duration-300
+          ${isDarkmodeEnabled
+                    ? "border-[#c2b6a3] text-[#e7dccf]"
+                    : "border-[#3a3835] text-[#3a3835]"
+                  }
+          ${!added && "hover:bg-black hover:text-white"}
+          `}
               >
-                Add to Basket
+                <span className={`transition ${added ? "opacity-0" : "opacity-100"}`}>
+                  ADD TO BASKET
+                </span>
+
+                <span
+                  className={`absolute inset-0 flex items-center justify-center transition
+            ${added ? "opacity-100 scale-100" : "opacity-0 scale-75"}`}
+                >
+                  ✓ ADDED
+                </span>
               </button>
             </>
           )}
@@ -235,22 +250,22 @@ const Details = () => {
 
               <input className="border p-2" placeholder="Name"
                 value={form.name}
-                onChange={(e)=>setForm({...form,name:e.target.value})}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
 
               <input className="border p-2" placeholder="Title"
                 value={form.title}
-                onChange={(e)=>setForm({...form,title:e.target.value})}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
               />
 
               <textarea className="border p-2 sm:col-span-2" placeholder="Description"
                 value={form.description}
-                onChange={(e)=>setForm({...form,description:e.target.value})}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
               />
 
               <select className="border p-2"
                 value={form.categoryId}
-                onChange={(e)=>setForm({...form, categoryId: e.target.value})}
+                onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
               >
                 <option value="">Category</option>
                 {categories.map(cat => (
@@ -260,18 +275,18 @@ const Details = () => {
 
               <input type="number" className="border p-2"
                 value={form.price}
-                onChange={(e)=>setForm({...form,price:e.target.value})}
+                onChange={(e) => setForm({ ...form, price: e.target.value })}
               />
 
               <input type="number" className="border p-2"
                 value={form.stockCount}
-                onChange={(e)=>setForm({...form,stockCount:e.target.value})}
+                onChange={(e) => setForm({ ...form, stockCount: e.target.value })}
               />
 
             </div>
 
             <div className="flex flex-col sm:flex-row justify-end gap-3">
-              <button onClick={()=>setShowEdit(false)} className="border px-4 py-2">Cancel</button>
+              <button onClick={() => setShowEdit(false)} className="border px-4 py-2">Cancel</button>
               <button onClick={updateProduct} className="bg-black text-white px-4 py-2">Save</button>
             </div>
 
@@ -288,11 +303,11 @@ const Details = () => {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {images.map((img, index) => (
-                <div key={img.id} className="relative group cursor-pointer" onClick={()=>setCurrentIndex(index)}>
-                  <img src={img.url} className="h-[90px] sm:h-[100px] w-full object-cover rounded"/>
+                <div key={img.id} className="relative group cursor-pointer" onClick={() => setCurrentIndex(index)}>
+                  <img src={img.url} className="h-[90px] sm:h-[100px] w-full object-cover rounded" />
 
                   <button
-                    onClick={(e)=>{
+                    onClick={(e) => {
                       e.stopPropagation()
                       deleteImage(img.id)
                     }}
@@ -304,13 +319,13 @@ const Details = () => {
               ))}
             </div>
 
-            <input type="file" onChange={(e)=>setEditImage(e.target.files[0])}/>
+            <input type="file" onChange={(e) => setEditImage(e.target.files[0])} />
 
             <button onClick={uploadImage} className="bg-green-500 text-white py-2 w-full rounded">
               Upload
             </button>
 
-            <button onClick={()=>setShowImageModal(false)} className="border py-2 w-full rounded">
+            <button onClick={() => setShowImageModal(false)} className="border py-2 w-full rounded">
               Close
             </button>
 

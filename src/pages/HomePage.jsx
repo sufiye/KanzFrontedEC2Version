@@ -166,23 +166,31 @@ const addProduct = async () => {
     }
   };
 
-const addCategory = async () => {
-  try {
+  const addCategory = async () => {
+    try {
 
-    if (!newCategory.trim()) {
-      alert("Category name cannot be empty!");
+      if (!newCategory.trim()) {
+        alert("Category name cannot be empty!");
+        return;
+      }
+       const exists = categories.some(
+      (cat) => cat.name.toLowerCase() === newCategory.trim().toLowerCase()
+    );
+
+    if (exists) {
+      alert("Category name already exists!");
       return;
     }
 
-    await api.post("/Category", { name: newCategory });
+      await api.post("/Category", { name: newCategory });
 
-    setNewCategory("");
-    getCategories();
+      setNewCategory("");
+      getCategories();
 
-  } catch (err) {
-    console.error("ADD CATEGORY ERROR:", err);
-  }
-};
+    } catch (err) {
+      console.error("ADD CATEGORY ERROR:", err);
+    }
+  };
 
   const deleteCategory = async (id) => {
     try {
@@ -390,7 +398,7 @@ const addCategory = async () => {
             </button>
 
           </div>
-        </div>
+        </div> 
       )}
 
       <Footer />

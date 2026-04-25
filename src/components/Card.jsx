@@ -14,7 +14,9 @@ const CartCard = ({ product }) => {
   const navigate = useNavigate();
   const { accessToken, roles } = useTokens();
 
-  const isAdmin = roles?.includes("Admin"); 
+  const isAdmin = roles?.includes("Admin");
+  const isOutOfStock = product?.stockCount === 0;
+
   const imageGet = async (id) => {
     try {
       const res = await fetch(`${API_URL}/Attachment/${id}/download`);
@@ -26,11 +28,15 @@ const CartCard = ({ product }) => {
   };
 
   const goToDetails = () => {
-    navigate(`/details/${product.id}`);
+    if (!isOutOfStock) {
+      navigate(`/details/${product.id}`);
+    }
   };
 
   const addToBasket = async (e) => {
     e.stopPropagation();
+
+    if (isOutOfStock) return;
 
     if (!accessToken) {
       navigate("/login");
@@ -45,7 +51,6 @@ const CartCard = ({ product }) => {
 
       setAdded(true);
       setTimeout(() => setAdded(false), 1500);
-
     } catch (error) {
       console.error(error);
     }
@@ -60,10 +65,20 @@ const CartCard = ({ product }) => {
   return (
     <div
       onClick={goToDetails}
-      className={`relative p-3 rounded-xl flex flex-col gap-2 cursor-pointer border 
-      transition-all duration-300 hover:scale-[1.03]
-      ${isDarkmodeEnabled ? "bg-[#1f1b16]" : "bg-[#f4efe7]"}`}
+      className={`relative p-3 rounded-xl flex flex-col gap-2 border 
+      transition-all duration-300 
+      ${!isOutOfStock && "hover:scale-[1.03] cursor-pointer"}
+      ${isDarkmodeEnabled ? "bg-[#1f1b16]" : "bg-[#f4efe7]"}
+      ${isOutOfStock ? "opacity-50 cursor-not-allowed" : ""}
+      `}
     >
+      {/* SOLD OUT badge */}
+      {isOutOfStock && (
+        <div className="absolute top-2 left-2 bg-black text-white text-[10px] px-2 py-1 rounded">
+          SOLD OUT
+        </div>
+      )}
+
       <img
         className="w-full h-[200px] object-cover rounded-lg"
         src={image}
@@ -81,22 +96,32 @@ const CartCard = ({ product }) => {
       {!isAdmin && (
         <button
           onClick={addToBasket}
+          disabled={isOutOfStock}
           className={`relative overflow-hidden border text-xs tracking-wide py-2 mt-2 transition-all duration-300
           ${
             isDarkmodeEnabled
               ? "border-[#c2b6a3] text-[#e7dccf]"
               : "border-[#3a3835] text-[#3a3835]"
           }
-          ${!added && "hover:bg-black hover:text-white"}
+          ${!added && !isOutOfStock && "hover:bg-black hover:text-white"}
+          ${isOutOfStock && "opacity-50 cursor-not-allowed"}
           `}
         >
-          <span className={`transition ${added ? "opacity-0" : "opacity-100"}`}>
-            ADD TO BASKET
+          <span
+            className={`transition ${
+              added ? "opacity-0" : "opacity-100"
+            }`}
+          >
+            {isOutOfStock ? "OUT OF STOCK" : "ADD TO BASKET"}
           </span>
 
           <span
             className={`absolute inset-0 flex items-center justify-center transition
-            ${added ? "opacity-100 scale-100" : "opacity-0 scale-75"}`}
+            ${
+              added
+                ? "opacity-100 scale-100"
+                : "opacity-0 scale-75"
+            }`}
           >
             ✓ ADDED
           </span>

@@ -15,7 +15,9 @@ const CartCard = ({ product }) => {
   const { accessToken, roles } = useTokens();
 
   const isAdmin = roles?.includes("Admin");
-  const isOutOfStock = product?.stockCount === 0;
+
+  // ✅ yalnız user üçün out of stock
+  const isOutOfStock = !isAdmin && product?.stockCount === 0;
 
   const imageGet = async (id) => {
     try {
@@ -28,7 +30,8 @@ const CartCard = ({ product }) => {
   };
 
   const goToDetails = () => {
-    if (!isOutOfStock) {
+    // ✅ admin həmişə daxil ola bilər
+    if (!isOutOfStock || isAdmin) {
       navigate(`/details/${product.id}`);
     }
   };
@@ -65,15 +68,15 @@ const CartCard = ({ product }) => {
   return (
     <div
       onClick={goToDetails}
-      className={`relative p-3 rounded-xl flex flex-col gap-2 border 
-      transition-all duration-300 
-      ${!isOutOfStock && "hover:scale-[1.03] cursor-pointer"}
+      className={`relative p-3 rounded-xl flex flex-col gap-2 border
+      transition-all duration-300
+      ${!isOutOfStock ? "hover:scale-[1.03] cursor-pointer" : ""}
       ${isDarkmodeEnabled ? "bg-[#1f1b16]" : "bg-[#f4efe7]"}
       ${isOutOfStock ? "opacity-50 cursor-not-allowed" : ""}
       `}
     >
-      {/* SOLD OUT badge */}
-      {isOutOfStock && (
+      {/* ✅ yalnız user üçün SOLD OUT */}
+      {isOutOfStock && !isAdmin && (
         <div className="absolute top-2 left-2 bg-black text-white text-[10px] px-2 py-1 rounded">
           SOLD OUT
         </div>
@@ -93,6 +96,7 @@ const CartCard = ({ product }) => {
         {product?.price?.toFixed(2)} AZN
       </p>
 
+      {/* ✅ admin button görmür */}
       {!isAdmin && (
         <button
           onClick={addToBasket}
@@ -103,8 +107,8 @@ const CartCard = ({ product }) => {
               ? "border-[#c2b6a3] text-[#e7dccf]"
               : "border-[#3a3835] text-[#3a3835]"
           }
-          ${!added && !isOutOfStock && "hover:bg-black hover:text-white"}
-          ${isOutOfStock && "opacity-50 cursor-not-allowed"}
+          ${!added && !isOutOfStock ? "hover:bg-black hover:text-white" : ""}
+          ${isOutOfStock ? "opacity-50 cursor-not-allowed" : ""}
           `}
         >
           <span

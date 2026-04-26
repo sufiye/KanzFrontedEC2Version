@@ -92,12 +92,14 @@ const Details = () => {
     }
   }
 
-  const nextImage = () => setCurrentIndex((p) => (p + 1) % images.length)
-  const prevImage = () => setCurrentIndex((p) => (p - 1 + images.length) % images.length)
+  const nextImage = () =>
+    setCurrentIndex((p) => (p + 1) % images.length)
+
+  const prevImage = () =>
+    setCurrentIndex((p) => (p - 1 + images.length) % images.length)
 
   const addToBasket = async () => {
     if (!accessToken) return navigate("/login")
-
     if (isOutOfStock) return
 
     if (quantity > product.stockCount) {
@@ -135,11 +137,7 @@ const Details = () => {
       const formData = new FormData()
       formData.append("file", editImage)
 
-      await api.post(`/products/${id}/attachments`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
+      await api.post(`/Product/${id}/attachments`, formData)
 
       setEditImage(null)
       getProduct()
@@ -167,36 +165,31 @@ const Details = () => {
     <div className={`${isDarkmodeEnabled ? "bg-[#1c1814] text-white" : "bg-[#f4efe7] text-black"} min-h-screen`}>
       <Navbar />
 
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10 p-4 sm:p-10">
+      <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 p-6">
 
         {/* IMAGE */}
-        <div className="relative group">
+        <div className="relative">
           <img
             src={images[currentIndex]?.url || "/no-image.png"}
-            className="h-[250px] sm:h-[350px] md:h-[400px] w-full object-cover rounded-2xl"
+            className="h-[400px] w-full object-cover rounded-2xl"
           />
 
           {images.length > 1 && (
             <>
-              <button onClick={prevImage} className="absolute left-2 top-1/2 bg-black/50 text-white px-2 py-1">‹</button>
-              <button onClick={nextImage} className="absolute right-2 top-1/2 bg-black/50 text-white px-2 py-1">›</button>
+              <button onClick={prevImage} className="absolute left-2 top-1/2 bg-black/50 text-white px-2">‹</button>
+              <button onClick={nextImage} className="absolute right-2 top-1/2 bg-black/50 text-white px-2">›</button>
             </>
           )}
         </div>
 
         {/* INFO */}
-        <div className="space-y-3 sm:space-y-4">
-          <span className="text-xs bg-gray-200 px-3 py-1 rounded-full">{category}</span>
+        <div className="space-y-4">
+          <span className="text-xs bg-gray-200 px-3 py-1 rounded-full text-black">{category}</span>
 
-          <h1 className="text-xl sm:text-2xl font-bold">{product.name}</h1>
-
-          <p className="text-lg sm:text-xl">{product.price?.toFixed(2)} AZN</p>
-
-          <p className="text-sm sm:text-base">{product.description}</p>
-
-          <p className="text-sm sm:text-base">
-            Stock: {product.stockCount}
-          </p>
+          <h1 className="text-2xl font-bold">{product.name}</h1>
+          <p className="text-xl">{product.price?.toFixed(2)} AZN</p>
+          <p>{product.description}</p>
+          <p>Stock: {product.stockCount}</p>
 
           {isAdmin && (
             <div className="flex gap-3">
@@ -207,61 +200,75 @@ const Details = () => {
 
           {!isAdmin && (
             <>
-              {/* QUANTITY */}
               <div className="flex gap-3 items-center">
-                <button
-                  onClick={() => setQuantity(q => q > 1 ? q - 1 : 1)}
-                  className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-black hover:text-white"
-                >
-                  -
-                </button>
-
+                <button onClick={() => setQuantity(q => q > 1 ? q - 1 : 1)}>-</button>
                 <span>{quantity}</span>
-
                 <button
-                  onClick={() =>
-                    setQuantity(q =>
-                      q < product.stockCount ? q + 1 : q
-                    )
-                  }
+                  onClick={() => setQuantity(q => q < product.stockCount ? q + 1 : q)}
                   disabled={isOutOfStock}
-                  className={`w-8 h-8 rounded-full border flex items-center justify-center
-                  ${!isOutOfStock && "hover:bg-black hover:text-white"}
-                  ${isOutOfStock && "opacity-50 cursor-not-allowed"}
-                  `}
-                >
-                  +
-                </button>
+                >+</button>
               </div>
 
-              {/* ADD BUTTON */}
               <button
                 onClick={addToBasket}
                 disabled={isOutOfStock}
-                className={`relative overflow-hidden border text-sm tracking-wide px-3 py-2 mt-2 transition-all duration-300
-                ${isDarkmodeEnabled
-                  ? "border-[#c2b6a3] text-[#e7dccf]"
-                  : "border-[#3a3835] text-[#3a3835]"
-                }
-                ${!added && !isOutOfStock && "hover:bg-black hover:text-white"}
-                ${isOutOfStock && "opacity-50 cursor-not-allowed"}
-                `}
+                className="border px-4 py-2"
               >
-                <span className={`transition ${added ? "opacity-0" : "opacity-100"}`}>
-                  {isOutOfStock ? "OUT OF STOCK" : "ADD TO BASKET"}
-                </span>
-
-                <span
-                  className={`absolute inset-0 flex items-center justify-center transition
-                  ${added ? "opacity-100 scale-100" : "opacity-0 scale-75"}`}
-                >
-                  ✓ ADDED
-                </span>
+                {isOutOfStock ? "OUT OF STOCK" : added ? "✓ ADDED" : "ADD TO BASKET"}
               </button>
             </>
           )}
         </div>
       </div>
+
+      {/* EDIT MODAL */}
+      {showEdit && (
+        <div className="fixed inset-0 bg-black/60 flex justify-center items-center">
+          <div className="bg-white text-black p-6 rounded-xl w-[400px] space-y-3">
+            <h2>Edit Product</h2>
+
+            <input className="w-full border p-2" value={form.name} onChange={e => setForm({...form, name:e.target.value})}/>
+            <input className="w-full border p-2" value={form.title} onChange={e => setForm({...form, title:e.target.value})}/>
+            <input type="number" className="w-full border p-2" value={form.price} onChange={e => setForm({...form, price:e.target.value})}/>
+            <input type="number" className="w-full border p-2" value={form.stockCount} onChange={e => setForm({...form, stockCount:e.target.value})}/>
+            <textarea className="w-full border p-2" value={form.description} onChange={e => setForm({...form, description:e.target.value})}/>
+
+            <select className="w-full border p-2" value={form.categoryId} onChange={e => setForm({...form, categoryId:e.target.value})}>
+              {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setShowEdit(false)}>Cancel</button>
+              <button onClick={updateProduct} className="bg-black text-white px-3 py-1">Save</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* IMAGE MODAL */}
+      {showImageModal && (
+        <div className="fixed inset-0 bg-black/60 flex justify-center items-center">
+          <div className="bg-white text-black p-6 rounded-xl w-[400px] space-y-4">
+
+            <h2>Manage Images</h2>
+
+            <input type="file" onChange={(e)=>setEditImage(e.target.files[0])}/>
+            <button onClick={uploadImage} className="bg-black text-white px-3 py-1">Upload</button>
+
+            <div className="grid grid-cols-3 gap-2">
+              {images.map(img => (
+                <div key={img.id} className="relative">
+                  <img src={img.url} className="h-20 w-full object-cover"/>
+                  <button onClick={()=>deleteImage(img.id)} className="absolute top-0 right-0 bg-red-500 text-white px-1">x</button>
+                </div>
+              ))}
+            </div>
+
+            <button onClick={()=>setShowImageModal(false)}>Close</button>
+
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

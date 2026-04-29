@@ -47,7 +47,6 @@ const HomePage = () => {
 
       if (selectedCategory) {
         res = await api.get(`/Product/${selectedCategory}/category`);
-
         let filtered = normalizeArray(res.data);
 
         if (searchTerm.length >= 1) {
@@ -95,16 +94,10 @@ const HomePage = () => {
 
     const items = normalizeArray(res.data);
 
-    setProducts((prev) => [
-      ...(Array.isArray(prev) ? prev : []),
-      ...items
-    ]);
-
+    setProducts((prev) => [...(Array.isArray(prev) ? prev : []), ...items]);
     setPage(nextPage);
 
-    if (items.length < 10) {
-      setAllLoaded(true);
-    }
+    if (items.length < 10) setAllLoaded(true);
   };
 
   const showLess = () => {
@@ -118,20 +111,9 @@ const HomePage = () => {
     setCategories(normalizeArray(res.data));
   };
 
+
   const addProduct = async () => {
     try {
-      if (
-        !form.name.trim() ||
-        !form.title.trim() ||
-        !form.description.trim() ||
-        !form.categoryId ||
-        !form.price ||
-        !form.stockCount
-      ) {
-        alert("All fields are required!");
-        return;
-      }
-
       const formData = new FormData();
 
       formData.append("name", form.name);
@@ -156,51 +138,17 @@ const HomePage = () => {
 
       getProducts();
     } catch (err) {
-      console.error("ADD PRODUCT ERROR:", err);
-    }
-  };
-
-  const deleteProduct = async (product) => {
-    try {
-      if (product.attachments && product.attachments.length > 0) {
-        await Promise.all(
-          product.attachments.map((att) =>
-            api.delete(`/Attachment/${att.id}`)
-          )
-        );
-      }
-
-      await api.delete(`/Product/${product.id}`);
-
-      setProducts((prev) => prev.filter((p) => p.id !== product.id));
-    } catch (err) {
-      console.error("DELETE ERROR:", err);
+      console.error(err);
     }
   };
 
   const addCategory = async () => {
     try {
-      if (!newCategory.trim()) {
-        alert("Category name cannot be empty!");
-        return;
-      }
-
-      const exists = categories.some(
-        (cat) =>
-          cat.name.toLowerCase() === newCategory.trim().toLowerCase()
-      );
-
-      if (exists) {
-        alert("Category name already exists!");
-        return;
-      }
-
       await api.post("/Category", { name: newCategory });
-
       setNewCategory("");
       getCategories();
     } catch (err) {
-      console.error("ADD CATEGORY ERROR:", err);
+      console.error(err);
     }
   };
 
@@ -209,7 +157,7 @@ const HomePage = () => {
       await api.delete(`/Category/${id}`);
       setCategories((prev) => prev.filter((c) => c.id !== id));
     } catch (err) {
-      console.error("DELETE CATEGORY ERROR:", err);
+      console.error(err);
     }
   };
 
@@ -236,69 +184,133 @@ const HomePage = () => {
         setSelectedCategory={setSelectedCategory}
       />
 
-      <h2 className="text-center mt-16 sm:mt-20 mb-8 sm:mb-10 tracking-[3px] text-xs sm:text-sm">
+      <h2 className="text-center mt-16 mb-10 tracking-[3px] text-sm">
         BACK IN STOCK
       </h2>
 
       {isAdmin && (
-        <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-6 px-4">
+        <div className="flex justify-center gap-4 mb-6">
           <button
             onClick={() => setShowModal(true)}
-            className="border px-4 sm:px-6 py-2 text-xs hover:bg-black hover:text-white"
+            className="border px-6 py-2 text-xs hover:bg-black hover:text-white"
           >
             ADD PRODUCT
           </button>
 
           <button
             onClick={() => setShowCategoryModal(true)}
-            className="border px-4 sm:px-6 py-2 text-xs hover:bg-black hover:text-white"
+            className="border px-6 py-2 text-xs hover:bg-black hover:text-white"
           >
             MANAGE CATEGORY
           </button>
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 sm:px-8 lg:px-12 max-w-7xl mx-auto">
-        {Array.isArray(products) &&
-          products.map((product) => (
-            <div key={product.id}>
-              <Card product={product} />
-
-              {isAdmin && (
-                <button
-                  onClick={() => deleteProduct(product)}
-                  className="text-red-500 text-xs mt-2"
-                >
-                  DELETE
-                </button>
-              )}
-            </div>
-          ))}
+      <div className="grid grid-cols-4 gap-6 px-12 max-w-7xl mx-auto">
+        {products.map((product) => (
+          <Card key={product.id} product={product} />
+        ))}
       </div>
 
-      {!allLoaded && !selectedCategory && (
-        <div className="flex justify-center mt-10">
-          <button
-            onClick={loadMore}
-            className="border px-4 sm:px-6 py-2 text-sm tracking-wide transition-all duration-300 hover:bg-black hover:text-white active:scale-95"
-          >
-            Load More
-          </button>
-        </div>
-      )}
-
-      {allLoaded && products.length > 10 && (
-        <div className="flex justify-center mt-4">
-          <button
-            onClick={showLess}
-            className="border px-4 sm:px-6 py-2 text-sm tracking-wide transition-all duration-300 hover:bg-black hover:text-white active:scale-95"
-          >
-            Show Less
-          </button>
-        </div>
-      )}
-
       <Footer />
+
+      {showModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
+          <div className="bg-white text-black p-6 rounded-lg w-[400px] space-y-3">
+            <h2 className="text-lg font-bold">Add Product</h2>
+
+            <input
+              placeholder="Name"
+              className="border p-2 w-full"
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+            />
+
+            <input
+              placeholder="Title"
+              className="border p-2 w-full"
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+            />
+
+            <textarea
+              placeholder="Description"
+              className="border p-2 w-full"
+              onChange={(e) =>
+                setForm({ ...form, description: e.target.value })
+              }
+            />
+
+            <input
+              type="number"
+              placeholder="Price"
+              className="border p-2 w-full"
+              onChange={(e) => setForm({ ...form, price: e.target.value })}
+            />
+
+            <input
+              type="number"
+              placeholder="Stock"
+              className="border p-2 w-full"
+              onChange={(e) =>
+                setForm({ ...form, stockCount: e.target.value })
+              }
+            />
+
+            <button
+              onClick={addProduct}
+              className="bg-black text-white w-full py-2"
+            >
+              Save
+            </button>
+
+            <button onClick={() => setShowModal(false)} className="w-full">
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showCategoryModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
+          <div className="bg-white text-black p-6 rounded-lg w-[400px] space-y-3">
+            <h2 className="text-lg font-bold">Manage Categories</h2>
+
+            <input
+              placeholder="New Category"
+              className="border p-2 w-full"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+            />
+
+            <button
+              onClick={addCategory}
+              className="bg-black text-white w-full py-2"
+            >
+              Add
+            </button>
+
+            <div className="space-y-2">
+              {categories.map((c) => (
+                <div key={c.id} className="flex justify-between">
+                  <span>{c.name}</span>
+                  <button
+                    onClick={() => deleteCategory(c.id)}
+                    className="text-red-500"
+                  >
+                    delete
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setShowCategoryModal(false)}
+              className="w-full mt-2"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -40,7 +40,6 @@ const Details = () => {
 
   const isOutOfStock = product?.stockCount === 0
 
-  // 🔥 SAFE NORMALIZER
   const normalizeArray = (data) => {
     if (Array.isArray(data)) return data
     if (Array.isArray(data?.items)) return data.items
@@ -48,13 +47,10 @@ const Details = () => {
     return []
   }
 
-  // 🔥 PRODUCT
   const getProduct = async () => {
     try {
       const res = await api.get(`Product/${id}`)
-      const data = res?.data
-
-      if (!data) return
+      const data = res.data
 
       setProduct(data)
 
@@ -82,69 +78,25 @@ const Details = () => {
     }
   }
 
-  // 🔥 CATEGORY
   const getCategory = async (id) => {
     try {
       if (!id) return
       const res = await api.get(`Category/${id}`)
-      setCategory(res?.data?.name || "")
+      setCategory(res.data?.name || "")
     } catch (error) {
-      console.error("CATEGORY ERROR:", error)
+      console.error(error)
     }
   }
 
   const getCategories = async () => {
     try {
       const res = await api.get("/Category")
-      setCategories(normalizeArray(res?.data))
+      setCategories(normalizeArray(res.data))
     } catch (error) {
-      console.error("CATEGORIES ERROR:", error)
+      console.error(error)
     }
   }
 
-  // 🔥 IMAGE NAV SAFE
-  const nextImage = () => {
-    if (!images.length) return
-    setCurrentIndex((p) => (p + 1) % images.length)
-  }
-
-  const prevImage = () => {
-    if (!images.length) return
-    setCurrentIndex((p) => (p - 1 + images.length) % images.length)
-  }
-
-  // 🔥 BASKET
-  const addToBasket = async () => {
-    if (!accessToken) return navigate("/login")
-    if (isOutOfStock) return
-
-    if (quantity > (product?.stockCount || 0)) {
-      alert("Stock limit exceeded!")
-      return
-    }
-
-    await api.post("/BasketItem", {
-      productId: product?.id,
-      quantity,
-    })
-
-    setAdded(true)
-    setTimeout(() => setAdded(false), 1500)
-  }
-
-  // 🔥 UPDATE
-  const updateProduct = async () => {
-    await api.put(`/Product/${id}`, {
-      ...form,
-      price: Number(form.price),
-      stockCount: Number(form.stockCount),
-    })
-
-    setShowEdit(false)
-    getProduct()
-  }
-
-  // 🔥 UPLOAD IMAGE FIXED
   const uploadImage = async () => {
     try {
       if (!editImage) return alert("Select image!")
@@ -164,15 +116,43 @@ const Details = () => {
     }
   }
 
-  // 🔥 DELETE IMAGE
   const deleteImage = async (imageId) => {
     try {
       await api.delete(`/Attachment/${imageId}`)
       setImages((prev) => prev.filter((img) => img.id !== imageId))
       setCurrentIndex(0)
     } catch (err) {
-      console.error("DELETE ERROR:", err?.response?.data || err)
+      console.error(err)
     }
+  }
+
+  const addToBasket = async () => {
+    if (!accessToken) return navigate("/login")
+    if (isOutOfStock) return
+
+    if (quantity > (product?.stockCount || 0)) {
+      alert("Stock limit exceeded!")
+      return
+    }
+
+    await api.post("/BasketItem", {
+      productId: product.id,
+      quantity,
+    })
+
+    setAdded(true)
+    setTimeout(() => setAdded(false), 1500)
+  }
+
+  const updateProduct = async () => {
+    await api.put(`/Product/${id}`, {
+      ...form,
+      price: Number(form.price),
+      stockCount: Number(form.stockCount),
+    })
+
+    setShowEdit(false)
+    getProduct()
   }
 
   useEffect(() => {
@@ -186,7 +166,6 @@ const Details = () => {
 
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 p-6">
 
-        {/* IMAGE */}
         <div className="relative">
           <img
             src={images[currentIndex]?.url || "/no-image.png"}
@@ -195,13 +174,15 @@ const Details = () => {
 
           {images.length > 1 && (
             <>
-              <button onClick={prevImage} className="absolute left-2 top-1/2 bg-black/50 text-white px-2">‹</button>
-              <button onClick={nextImage} className="absolute right-2 top-1/2 bg-black/50 text-white px-2">›</button>
+              <button onClick={() => setCurrentIndex((p) => (p - 1 + images.length) % images.length)}
+                className="absolute left-2 top-1/2 bg-black/50 text-white px-2">‹</button>
+
+              <button onClick={() => setCurrentIndex((p) => (p + 1) % images.length)}
+                className="absolute right-2 top-1/2 bg-black/50 text-white px-2">›</button>
             </>
           )}
         </div>
 
-        {/* INFO */}
         <div className="space-y-4">
           <span className="text-xs bg-gray-200 px-3 py-1 rounded-full text-black">{category}</span>
 
@@ -222,23 +203,31 @@ const Details = () => {
               <div className="flex gap-3 items-center">
                 <button onClick={() => setQuantity(q => Math.max(1, q - 1))}>-</button>
                 <span>{quantity}</span>
-                <button
-                  onClick={() => setQuantity(q => Math.min(product?.stockCount || 0, q + 1))}
-                  disabled={isOutOfStock}
-                >+</button>
+                <button onClick={() => setQuantity(q => Math.min(product?.stockCount || 0, q + 1))}
+                  disabled={isOutOfStock}>+</button>
               </div>
 
-              <button
-                onClick={addToBasket}
-                disabled={isOutOfStock}
-                className="border px-4 py-2"
-              >
+              <button onClick={addToBasket} disabled={isOutOfStock}
+                className="border px-4 py-2">
                 {isOutOfStock ? "OUT OF STOCK" : added ? "✓ ADDED" : "ADD TO BASKET"}
               </button>
             </>
           )}
         </div>
       </div>
+
+      {showEdit &&
+        (<div className="fixed inset-0 bg-black/60 flex justify-center items-center">
+          <div className="bg-white text-black p-6 rounded-xl w-[400px] space-y-3">
+            <h2>Edit Product</h2> <input className="w-full border p-2"
+              value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+            <input className="w-full border p-2" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
+            <input type="number" className="w-full border p-2" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} />
+            <input type="number" className="w-full border p-2" value={form.stockCount} onChange={e => setForm({ ...form, stockCount: e.target.value })} />
+             <textarea className="w-full border p-2" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+               <select className="w-full border p-2" value={form.categoryId} onChange={e => setForm({ ...form, categoryId: e.target.value })}> {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)} </select> <div className="flex justify-end gap-2">
+                 <button onClick={() => setShowEdit(false)}>Cancel</button> <button onClick={updateProduct} className="bg-black text-white px-3 py-1">Save</button> </div> </div> </div>)}
+                  {showImageModal && (<div className="fixed inset-0 bg-black/60 flex justify-center items-center"> <div className="bg-white text-black p-6 rounded-xl w-[400px] space-y-4"> <h2>Manage Images</h2> <input type="file" onChange={(e) => setEditImage(e.target.files[0])} /> <button onClick={uploadImage} className="bg-black text-white px-3 py-1">Upload</button> <div className="grid grid-cols-3 gap-2"> {images.map(img => (<div key={img.id} className="relative"> <img src={img.url} className="h-20 w-full object-cover" /> <button onClick={() => deleteImage(img.id)} className="absolute top-0 right-0 bg-red-500 text-white px-1">x</button> </div>))} </div> <button onClick={() => setShowImageModal(false)}>Close</button> </div> </div>)}
 
       <Footer />
     </div>

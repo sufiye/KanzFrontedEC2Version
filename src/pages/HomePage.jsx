@@ -37,6 +37,7 @@ const HomePage = () => {
   const normalizeArray = (data) => {
     if (Array.isArray(data)) return data;
     if (Array.isArray(data?.items)) return data.items;
+    if (Array.isArray(data?.data)) return data.data;
     return [];
   };
 
@@ -55,7 +56,7 @@ const HomePage = () => {
           );
         }
 
-        setProducts(filtered);
+        setProducts(normalizeArray(filtered));
         setAllLoaded(true);
         return;
       }
@@ -70,7 +71,7 @@ const HomePage = () => {
 
       const items = normalizeArray(res.data);
 
-      setProducts(items);
+      setProducts(normalizeArray(items));
       setPage(1);
       setAllLoaded(items.length < 10);
     } catch (error) {
@@ -94,7 +95,11 @@ const HomePage = () => {
 
     const items = normalizeArray(res.data);
 
-    setProducts((prev) => [...prev, ...items]);
+    setProducts((prev) => [
+      ...(Array.isArray(prev) ? prev : []),
+      ...items
+    ]);
+
     setPage(nextPage);
 
     if (items.length < 10) {
@@ -290,166 +295,6 @@ const HomePage = () => {
           >
             Show Less
           </button>
-        </div>
-      )}
-
-      {showModal && (
-        <div className="fixed inset-0 bg-black/60 flex justify-center items-center px-4">
-          <div className="bg-white w-full max-w-[500px] p-6 rounded-2xl text-black space-y-5">
-            <h2 className="text-xl font-semibold">Add Product</h2>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs">Name</label>
-                <input
-                  className="border p-2 rounded w-full"
-                  value={form.name}
-                  onChange={(e) =>
-                    setForm({ ...form, name: e.target.value })
-                  }
-                />
-              </div>
-
-              <div>
-                <label className="text-xs">Title</label>
-                <input
-                  className="border p-2 rounded w-full"
-                  value={form.title}
-                  onChange={(e) =>
-                    setForm({ ...form, title: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="text-xs">Description</label>
-                <textarea
-                  className="border p-2 rounded w-full"
-                  value={form.description}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      description: e.target.value,
-                    })
-                  }
-                />
-              </div>
-
-              <div>
-                <label className="text-xs">Category</label>
-                <select
-                  className="border p-2 rounded w-full"
-                  value={form.categoryId}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      categoryId: e.target.value,
-                    })
-                  }
-                >
-                  <option value="">Select category</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs">Price (AZN)</label>
-                <input
-                  type="number"
-                  className="border p-2 rounded w-full"
-                  value={form.price}
-                  min={1}
-                  onChange={(e) =>
-                    setForm({ ...form, price: e.target.value })
-                  }
-                />
-              </div>
-
-              <div>
-                <label className="text-xs">Stock Count</label>
-                <input
-                  type="number"
-                  className="border p-2 rounded w-full"
-                  value={form.stockCount}
-                  min={1}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      stockCount: e.target.value,
-                    })
-                  }
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row justify-end gap-3">
-              <button
-                onClick={() => setShowModal(false)}
-                className="border px-4 py-2"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={addProduct}
-                className="bg-black text-white px-4 py-2"
-              >
-                Add
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showCategoryModal && (
-        <div className="fixed inset-0 bg-black/60 flex justify-center items-center px-4">
-          <div className="bg-white p-6 w-full max-w-[400px] rounded-2xl text-black space-y-4">
-            <h2 className="font-semibold">Manage Categories</h2>
-
-            <div className="flex gap-2">
-              <input
-                placeholder="New category"
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-                className="border p-2 w-full"
-              />
-
-              <button
-                onClick={addCategory}
-                className="bg-green-500 text-white px-4"
-              >
-                Add
-              </button>
-            </div>
-
-            <div className="space-y-2 max-h-[200px] overflow-y-auto">
-              {categories.map((c) => (
-                <div
-                  key={c.id}
-                  className="flex justify-between items-center border p-2 rounded"
-                >
-                  <span>{c.name}</span>
-
-                  <button
-                    onClick={() => deleteCategory(c.id)}
-                    className="text-red-500 text-sm"
-                  >
-                    Delete
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            <button
-              onClick={() => setShowCategoryModal(false)}
-              className="w-full border py-2"
-            >
-              Close
-            </button>
-          </div>
         </div>
       )}
 

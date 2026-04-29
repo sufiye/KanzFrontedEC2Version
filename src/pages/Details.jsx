@@ -6,8 +6,6 @@ import { useDarkmode } from "../stores/store"
 import { useTokens } from "../stores/tokenStore"
 import api from "../utils/axios"
 
-const API_URL = "http://localhost:5064/api"
-
 const Details = () => {
   const { isDarkmodeEnabled } = useDarkmode()
   const { accessToken, roles } = useTokens()
@@ -42,71 +40,91 @@ const Details = () => {
 
   const isOutOfStock = product?.stockCount === 0
 
-const getProduct = async () => {
-  try {
-    const res = await fetch(`${API_URL}/Product/${id}`);
-    const data = await res.json();
-
-    setProduct(data);
-
-    setForm({
-      name: data.name,
-      title: data.title,
-      description: data.description,
-      categoryId: data.categoryId,
-      price: data.price,
-      stockCount: data.stockCount,
-    });
-
-    getCategory(data.categoryId);
-
-    if (data.attachments?.length > 0) {
-      const imgs = data.attachments.map((att) => ({
-        url: att.imgUrl,  
-        id: att.id
-      }));
-
-      setImages(imgs);
-    } else {
-      setImages([]);
-    }
-  } catch (error) {
-    console.error("PRODUCT ERROR:", error);
+  // 🔥 SAFE NORMALIZER
+  const normalizeArray = (data) => {
+    if (Array.isArray(data)) return data
+    if (Array.isArray(data?.items)) return data.items
+    if (Array.isArray(data?.data)) return data.data
+    return []
   }
-};
 
+  // 🔥 PRODUCT
+  const getProduct = async () => {
+    try {
+      const res = await api.get(`Product/${id}`)
+      const data = res?.data
+
+      if (!data) return
+
+      setProduct(data)
+
+      setForm({
+        name: data?.name || "",
+        title: data?.title || "",
+        description: data?.description || "",
+        categoryId: data?.categoryId || "",
+        price: data?.price || 0,
+        stockCount: data?.stockCount || 0,
+      })
+
+      if (data?.categoryId) getCategory(data.categoryId)
+
+      const imgs = normalizeArray(data?.attachments).map((att) => ({
+        url: att?.imgUrl || "",
+        id: att?.id,
+      }))
+
+      setImages(imgs)
+      setCurrentIndex(0)
+
+    } catch (error) {
+      console.error("PRODUCT ERROR:", error)
+    }
+  }
+
+  // 🔥 CATEGORY
   const getCategory = async (id) => {
-    const res = await fetch(`${API_URL}/Category/${id}`)
-    const data = await res.json()
-    setCategory(data.name)
+    try {
+      if (!id) return
+      const res = await api.get(`Category/${id}`)
+      setCategory(res?.data?.name || "")
+    } catch (error) {
+      console.error("CATEGORY ERROR:", error)
+    }
   }
 
   const getCategories = async () => {
     try {
       const res = await api.get("/Category")
-      setCategories(res.data)
+      setCategories(normalizeArray(res?.data))
     } catch (error) {
-      console.error(error)
+      console.error("CATEGORIES ERROR:", error)
     }
   }
 
-  const nextImage = () =>
+  // 🔥 IMAGE NAV SAFE
+  const nextImage = () => {
+    if (!images.length) return
     setCurrentIndex((p) => (p + 1) % images.length)
+  }
 
-  const prevImage = () =>
+  const prevImage = () => {
+    if (!images.length) return
     setCurrentIndex((p) => (p - 1 + images.length) % images.length)
+  }
 
+  // 🔥 BASKET
   const addToBasket = async () => {
     if (!accessToken) return navigate("/login")
     if (isOutOfStock) return
 
-    if (quantity > product.stockCount) {
+    if (quantity > (product?.stockCount || 0)) {
       alert("Stock limit exceeded!")
       return
     }
 
     await api.post("/BasketItem", {
-      productId: product.id,
+      productId: product?.id,
       quantity,
     })
 
@@ -114,6 +132,7 @@ const getProduct = async () => {
     setTimeout(() => setAdded(false), 1500)
   }
 
+  // 🔥 UPDATE
   const updateProduct = async () => {
     await api.put(`/Product/${id}`, {
       ...form,
@@ -124,42 +143,35 @@ const getProduct = async () => {
     setShowEdit(false)
     getProduct()
   }
-const uploadImage = async () => {
-  try {
-    const file = editImage;
 
-    console.log("FILE:", file);
-    console.log("PRODUCT ID:", id);
+  // 🔥 UPLOAD IMAGE FIXED
+  const uploadImage = async () => {
+    try {
+      if (!editImage) return alert("Select image!")
 
-    if (!file) {
-      alert("Select image!");
-      return;
+      const formData = new FormData()
+      formData.append("File", editImage)
+
+      await api.post(`/Attachment/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+
+      setEditImage(null)
+      await getProduct()
+
+    } catch (err) {
+      console.error("UPLOAD ERROR:", err?.response?.data || err)
     }
-
-    const formData = new FormData();
-    formData.append("File", file);
-
-    await api.post(`/Attachment/${id}`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-
-    setEditImage(null);
-
-    await getProduct(); // daha stabil
-
-  } catch (err) {
-    console.error("UPLOAD ERROR:", err.response?.data || err);
   }
-};
+
+  // 🔥 DELETE IMAGE
   const deleteImage = async (imageId) => {
     try {
       await api.delete(`/Attachment/${imageId}`)
-      setImages(prev => prev.filter(img => img.id !== imageId))
+      setImages((prev) => prev.filter((img) => img.id !== imageId))
       setCurrentIndex(0)
     } catch (err) {
-      console.error("DELETE ERROR:", err.response?.data || err)
+      console.error("DELETE ERROR:", err?.response?.data || err)
     }
   }
 
@@ -193,10 +205,10 @@ const uploadImage = async () => {
         <div className="space-y-4">
           <span className="text-xs bg-gray-200 px-3 py-1 rounded-full text-black">{category}</span>
 
-          <h1 className="text-2xl font-bold">{product.name}</h1>
-          <p className="text-xl">{product.price?.toFixed(2)} AZN</p>
-          <p>{product.description}</p>
-          <p>Stock: {product.stockCount}</p>
+          <h1 className="text-2xl font-bold">{product?.name}</h1>
+          <p className="text-xl">{product?.price?.toFixed(2)} AZN</p>
+          <p>{product?.description}</p>
+          <p>Stock: {product?.stockCount}</p>
 
           {isAdmin && (
             <div className="flex gap-3">
@@ -208,10 +220,10 @@ const uploadImage = async () => {
           {!isAdmin && (
             <>
               <div className="flex gap-3 items-center">
-                <button onClick={() => setQuantity(q => q > 1 ? q - 1 : 1)}>-</button>
+                <button onClick={() => setQuantity(q => Math.max(1, q - 1))}>-</button>
                 <span>{quantity}</span>
                 <button
-                  onClick={() => setQuantity(q => q < product.stockCount ? q + 1 : q)}
+                  onClick={() => setQuantity(q => Math.min(product?.stockCount || 0, q + 1))}
                   disabled={isOutOfStock}
                 >+</button>
               </div>
@@ -227,53 +239,6 @@ const uploadImage = async () => {
           )}
         </div>
       </div>
-
-      {showEdit && (
-        <div className="fixed inset-0 bg-black/60 flex justify-center items-center">
-          <div className="bg-white text-black p-6 rounded-xl w-[400px] space-y-3">
-            <h2>Edit Product</h2>
-
-            <input className="w-full border p-2" value={form.name} onChange={e => setForm({...form, name:e.target.value})}/>
-            <input className="w-full border p-2" value={form.title} onChange={e => setForm({...form, title:e.target.value})}/>
-            <input type="number" className="w-full border p-2" value={form.price} onChange={e => setForm({...form, price:e.target.value})}/>
-            <input type="number" className="w-full border p-2" value={form.stockCount} onChange={e => setForm({...form, stockCount:e.target.value})}/>
-            <textarea className="w-full border p-2" value={form.description} onChange={e => setForm({...form, description:e.target.value})}/>
-
-            <select className="w-full border p-2" value={form.categoryId} onChange={e => setForm({...form, categoryId:e.target.value})}>
-              {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setShowEdit(false)}>Cancel</button>
-              <button onClick={updateProduct} className="bg-black text-white px-3 py-1">Save</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showImageModal && (
-        <div className="fixed inset-0 bg-black/60 flex justify-center items-center">
-          <div className="bg-white text-black p-6 rounded-xl w-[400px] space-y-4">
-
-            <h2>Manage Images</h2>
-
-            <input type="file" onChange={(e)=>setEditImage(e.target.files[0])}/>
-            <button onClick={uploadImage} className="bg-black text-white px-3 py-1">Upload</button>
-
-            <div className="grid grid-cols-3 gap-2">
-              {images.map(img => (
-                <div key={img.id} className="relative">
-                  <img src={img.url} className="h-20 w-full object-cover"/>
-                  <button onClick={()=>deleteImage(img.id)} className="absolute top-0 right-0 bg-red-500 text-white px-1">x</button>
-                </div>
-              ))}
-            </div>
-
-            <button onClick={()=>setShowImageModal(false)}>Close</button>
-
-          </div>
-        </div>
-      )}
 
       <Footer />
     </div>

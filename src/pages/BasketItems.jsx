@@ -17,41 +17,58 @@ const BasketItems = () => {
   const [basketItems, setBasketItems] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchImage = async (attachmentId) => {
-    try {
-      const res = await fetch(`${API_URL}/Attachment/${attachmentId}/download`);
-      if (!res.ok) throw new Error();
-      const blob = await res.blob();
-      return URL.createObjectURL(blob);
-    } catch {
-      return "/no-image.png";
+const fetchImage = async (productId) => {
+ try {
+
+    const res = await api.get(`/Attachment/${productId}`);
+
+    const data = res.data;
+
+    if (Array.isArray(data) && data.length > 0) {
+      const image = data[0].imgUrl;
+return image
     }
-  };
+  } catch (error) {
+    console.error("IMAGE ERROR:", error);
+    setImage("/no-image.png");
+  }
+};
+const getBasketItems = async () => {
+  if (!accessToken) return;
 
-  const getBasketItems = async () => {
-    if (!accessToken) return;
+  try {
+    const { data } = await api.get("/BasketItem", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
 
-    try {
-      const { data } = await api.get("/BasketItem", {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+    const itemsWithImages = await Promise.all(
+      (data || []).map(async (item) => {
+        let imageUrl = "/no-image.png";
 
-      const itemsWithImages = await Promise.all(
-        (data || []).map(async (item) => {
-          const imageUrl = item.product?.attachments?.length
-            ? await fetchImage(item.product.attachments[0].id)
-            : "/no-image.png";
+        const productId = item?.product?.id;
 
-          return { ...item, imageUrl };
-        })
-      );
+        if (productId) {
+          try {
+            imageUrl = await fetchImage(productId);
+          } catch (err) {
+            console.error("IMAGE FETCH ERROR:", err);
+            imageUrl = "/no-image.png";
+          }
+        }
 
-      setBasketItems(itemsWithImages);
-    } catch {
-      toast.error("Failed to load basket");
-    }
-  };
+        return {
+          ...item,
+          imageUrl,
+        };
+      })
+    );
 
+    setBasketItems(itemsWithImages);
+  } catch (error) {
+    console.error("BASKET ERROR:", error);
+    toast.error("Failed to load basket");
+  }
+};  
   const removeFromBasket = async (id) => {
     if (!accessToken) return;
 

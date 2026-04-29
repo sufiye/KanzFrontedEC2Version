@@ -16,21 +16,30 @@ const CartCard = ({ product }) => {
 
   const isAdmin = roles?.includes("Admin");
 
-  // ✅ yalnız user üçün out of stock
+
   const isOutOfStock = !isAdmin && product?.stockCount === 0;
 
-  const imageGet = async (id) => {
-    try {
-      const res = await fetch(`${API_URL}/Attachment/${id}/download`);
-      const blob = await res.blob();
-      setImage(URL.createObjectURL(blob));
-    } catch (error) {
-      console.error(error);
-    }
-  };
+const imageGet = async (productId) => {
+  try {
 
+    const res = await api.get(`/Attachment/${productId}`);
+
+    const data = res.data;
+
+    if (Array.isArray(data) && data.length > 0) {
+      const iamge = data[0].imgUrl;
+
+      setImage(iamge);
+    } else {
+      setImage("/no-image.png");
+    }
+  } catch (error) {
+    console.error("IMAGE ERROR:", error);
+    setImage("/no-image.png");
+  }
+};
   const goToDetails = () => {
-    // ✅ admin həmişə daxil ola bilər
+
     if (!isOutOfStock || isAdmin) {
       navigate(`/details/${product.id}`);
     }
@@ -61,7 +70,7 @@ const CartCard = ({ product }) => {
 
   useEffect(() => {
     if (product?.attachments?.length > 0) {
-      imageGet(product.attachments[0].id);
+      imageGet(product.id);
     }
   }, [product]);
 
@@ -75,7 +84,6 @@ const CartCard = ({ product }) => {
       ${isOutOfStock ? "opacity-50 cursor-not-allowed" : ""}
       `}
     >
-      {/* ✅ yalnız user üçün SOLD OUT */}
       {isOutOfStock && !isAdmin && (
         <div className="absolute top-2 left-2 bg-black text-white text-[10px] px-2 py-1 rounded">
           SOLD OUT
@@ -96,7 +104,6 @@ const CartCard = ({ product }) => {
         {product?.price?.toFixed(2)} AZN
       </p>
 
-      {/* ✅ admin button görmür */}
       {!isAdmin && (
         <button
           onClick={addToBasket}

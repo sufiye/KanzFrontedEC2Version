@@ -42,11 +42,12 @@ const Details = () => {
 
   const isOutOfStock = product?.stockCount === 0
 
-  const getProduct = async () => {
-    const res = await fetch(`${API_URL}/Product/${id}`)
-    const data = await res.json()
+const getProduct = async () => {
+  try {
+    const res = await fetch(`${API_URL}/Product/${id}`);
+    const data = await res.json();
 
-    setProduct(data)
+    setProduct(data);
 
     setForm({
       name: data.name,
@@ -55,27 +56,24 @@ const Details = () => {
       categoryId: data.categoryId,
       price: data.price,
       stockCount: data.stockCount,
-    })
+    });
 
-    getCategory(data.categoryId)
+    getCategory(data.categoryId);
 
-    if (data.attachments?.length) {
-      const imgs = await Promise.all(
-        data.attachments.map(async (att) => {
-          const r = await fetch(`${API_URL}/Attachment/${att.id}/download`)
-          const blob = await r.blob()
+    if (data.attachments?.length > 0) {
+      const imgs = data.attachments.map((att) => ({
+        url: att.imgUrl,  
+        id: att.id
+      }));
 
-          return {
-            id: att.id,
-            url: URL.createObjectURL(blob),
-          }
-        })
-      )
-      setImages(imgs)
+      setImages(imgs);
     } else {
-      setImages([])
+      setImages([]);
     }
+  } catch (error) {
+    console.error("PRODUCT ERROR:", error);
   }
+};
 
   const getCategory = async (id) => {
     const res = await fetch(`${API_URL}/Category/${id}`)
@@ -126,26 +124,35 @@ const Details = () => {
     setShowEdit(false)
     getProduct()
   }
+const uploadImage = async () => {
+  try {
+    const file = editImage;
 
-  const uploadImage = async () => {
-    try {
-      if (!editImage) {
-        alert("Select image!")
-        return
-      }
+    console.log("FILE:", file);
+    console.log("PRODUCT ID:", id);
 
-      const formData = new FormData()
-      formData.append("file", editImage)
-
-      await api.post(`/Product/${id}/attachments`, formData)
-
-      setEditImage(null)
-      getProduct()
-    } catch (err) {
-      console.error("UPLOAD ERROR:", err.response?.data || err)
+    if (!file) {
+      alert("Select image!");
+      return;
     }
-  }
 
+    const formData = new FormData();
+    formData.append("File", file);
+
+    await api.post(`/Attachment/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    setEditImage(null);
+
+    await getProduct(); // daha stabil
+
+  } catch (err) {
+    console.error("UPLOAD ERROR:", err.response?.data || err);
+  }
+};
   const deleteImage = async (imageId) => {
     try {
       await api.delete(`/Attachment/${imageId}`)
@@ -221,7 +228,6 @@ const Details = () => {
         </div>
       </div>
 
-      {/* EDIT MODAL */}
       {showEdit && (
         <div className="fixed inset-0 bg-black/60 flex justify-center items-center">
           <div className="bg-white text-black p-6 rounded-xl w-[400px] space-y-3">
@@ -245,7 +251,6 @@ const Details = () => {
         </div>
       )}
 
-      {/* IMAGE MODAL */}
       {showImageModal && (
         <div className="fixed inset-0 bg-black/60 flex justify-center items-center">
           <div className="bg-white text-black p-6 rounded-xl w-[400px] space-y-4">

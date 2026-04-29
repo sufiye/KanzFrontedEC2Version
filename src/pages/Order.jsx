@@ -78,23 +78,6 @@ const Order = () => {
     }
   }
 
-const updateStatus = async (orderId, status) => {
-  try {
-    await api.put(`/Order/${orderId}`, {
-      status: status   
-    })
-
-    setOrders(prev =>
-      prev.map(o =>
-        o.id === orderId ? { ...o, status } : o
-      )
-    )
-
-  } catch (err) {
-    console.error("STATUS ERROR:", err.response?.data || err)
-  }
-}
-
   useEffect(() => {
     const token = localStorage.getItem("tokens")
 
@@ -137,7 +120,6 @@ const updateStatus = async (orderId, status) => {
                     ? "bg-[#26221d] border-[#3a342c]" 
                     : "bg-white border-[#e5e0d8]"}`}>
 
-                  {/* 🔥 USER INFO */}
                   {isAdmin && (
                     <div className="mb-3 text-sm space-y-1">
                       <p><b>User:</b> {user?.firstName+ " " + user?.lastName || "Loading..."}</p>
@@ -145,8 +127,6 @@ const updateStatus = async (orderId, status) => {
                       <p><b>Address:</b> {user?.address || "-"}</p>
                     </div>
                   )}
-
-                  {/* HEADER */}
                   <div className="flex justify-between mb-2">
                     <span className="text-xs opacity-70">
                       {order.id}
@@ -184,7 +164,7 @@ const updateStatus = async (orderId, status) => {
                             <img
                               src={
                                 product?.attachments?.length > 0
-                                  ? `${API_URL}/Attachment/${product.attachments[0].id}/download`
+                                  ? `${API_URL}/Attachment/${product.id}`
                                   : "/no-image.png"
                               }
                               className="w-12 h-12 object-cover rounded-lg"
